@@ -1,8 +1,5 @@
 # ios_project
 
-##### Install the dependencies
-yarn install
-
 ##### Run the server
 yarn dev
 
@@ -11,3 +8,6 @@ yarn build
 
 ##### Start the project
 yarn start
+
+##### use this command install new dependencies
+yarn add <package_name>
