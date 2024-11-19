@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/constants/testdata.ts","./src/models/chat.ts","./src/models/server.ts","./src/routes/auth.ts","./src/routes/friend.ts","./src/services/dberrorhandler.ts","./src/services/openai.ts"],"version":"5.6.3"}
