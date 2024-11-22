@@ -53,7 +53,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         },
       },
     },
-    async (request, reply) => {
+    async (request) => {
       try {
         const response = await axios.post(
           process.env.DB_API_URL + "api/auth/register",
