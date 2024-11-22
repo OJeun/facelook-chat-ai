@@ -61,7 +61,10 @@ export async function authRoutes(fastify: FastifyInstance) {
         );
         return response.data;
       } catch (error) {
-        errorHandler(error, reply);
+        errorHandler(
+          error,
+          "register failed, please check if your email is already in use"
+        );
       }
     }
   );
