@@ -2,13 +2,13 @@ import { FastifyInstance } from "fastify";
 import axios from "axios";
 import { errorHandler } from "../services/dbErrorHandler";
 
-interface AddFriendRequest {
+interface FriendRequest {
   userId: string;
   friendId: string;
 }
 
 export async function friendRoutes(fastify: FastifyInstance) {
-  fastify.post<{ Body: AddFriendRequest }>(
+  fastify.post<{ Body: FriendRequest }>(
     "/friend/add",
     {
       schema: {
@@ -46,12 +46,50 @@ export async function friendRoutes(fastify: FastifyInstance) {
     }
   );
 
+  fastify.post<{ Body: FriendRequest }>(
+    "/friend/delete",
+    {
+      schema: {
+        tags: ["friend"],
+        description: "Delete a friend",
+        security: [{ bearerAuth: [] }],
+        body: {
+          type: "object",
+          required: ["userId", "friendId"],
+          properties: {
+            userId: { type: "string" },
+            friendId: { type: "string" },
+          },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              message: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const response = await axios.delete(
+          process.env.DB_API_URL + "api/friend/delete",
+          { data: request.body }
+        );
+        return response.data;
+      } catch (error) {
+        errorHandler(error, reply);
+      }
+    }
+  );
+
   fastify.get<{ Params: { userId: string } }>(
     "/friend/:userId",
     {
       schema: {
         tags: ["friend"],
-        description: "Get user's friends",
+        description: "Get all user's friends",
         security: [{ bearerAuth: [] }],
         params: {
           type: "object",
@@ -65,9 +103,17 @@ export async function friendRoutes(fastify: FastifyInstance) {
             items: {
               type: "object",
               properties: {
-                id: { type: "string" },
-                name: { type: "string" },
-                email: { type: "string" },
+                friends: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      friendId: { type: "string" },
+                      name: { type: "string" },
+                      email: { type: "string" },
+                    },
+                  },
+                },
               },
             },
           },
