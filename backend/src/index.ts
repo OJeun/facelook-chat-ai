@@ -5,7 +5,7 @@ import { friendRoutes } from "./routes/friend";
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "./models/server";
 import fastifyWebsocket from "@fastify/websocket";
-import Redis from "ioredis-mock";
+// import Redis from "ioredis-mock";
 import { WebSocket } from "ws";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
@@ -20,12 +20,12 @@ const server: FastifyInstance = fastify({
             target: "pino-pretty",
           },
         }
-      : true, // 在生产环境中使用默认日志配置
+      : true, // only use in development
 });
 
-const redis = new Redis(); // Mocked Redis instance
-redis.set("key", "value", "EX", 10); // Temporary cache with expiration
-redis.get("key").then((value: any) => console.log("Cached Value:", value));
+// const redis = new Redis(); // Mocked Redis instance
+// redis.set("key", "value", "EX", 10); // Temporary cache with expiration
+// redis.get("key").then((value: any) => console.log("Cached Value:", value));
 
 // add error handling
 process.on("unhandledRejection", (err) => {

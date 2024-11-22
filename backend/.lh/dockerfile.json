@@ -1,0 +1,18 @@
+{
+    "sourceFile": "dockerfile",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1731998023227,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1731998023227,
+            "name": "Commit-0",
+            "content": "FROM node:20.18.0-alpine\r\n\r\nWORKDIR /app\r\n\r\nCOPY package.json ./\r\nRUN yarn install\r\n\r\nCOPY . .\r\nRUN yarn build\r\n\r\nEXPOSE 3001\r\n\r\nCMD [\"yarn\", \"start\"]"
+        }
+    ]
+}
