@@ -7,6 +7,8 @@ import { JWTPayload } from "./models/server";
 import fastifyWebsocket from "@fastify/websocket";
 import Redis from "ioredis-mock";
 import { WebSocket } from "ws";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
 
 //add websocket
 
@@ -48,7 +50,35 @@ server.get("/health", async () => {
 });
 
 // register routes
-server.register(authRoutes, { prefix: "/api" }); // add api prefix
+server.register(swagger, {
+  openapi: {
+    info: {
+      title: "Facelook API Documentation",
+      description: "API documentation for Facelook backend services",
+      version: "1.0.0",
+    },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "apiKey",
+          name: "Authorization",
+          in: "header",
+        },
+      },
+    },
+  },
+});
+
+server.register(swaggerUi, {
+  routePrefix: "/documentation",
+  uiConfig: {
+    docExpansion: "list",
+    deepLinking: false,
+  },
+});
+
+server.register(authRoutes, { prefix: "/api" });
+server.register(friendRoutes, { prefix: "/api" });
 
 const verifyToken = async (request: FastifyRequest) => {
   try {
@@ -73,15 +103,24 @@ const verifyToken = async (request: FastifyRequest) => {
 
 // add verifyToken hook, but exclude some paths
 server.addHook("preHandler", async (request) => {
-  const excludedPaths = ["/health", "/api/auth/login", "/api/auth/register"];
-  if (excludedPaths.includes(request.url)) {
+  const excludedPaths = [
+    "/health",
+    "/api/auth/login",
+    "/api/auth/register",
+    "/documentation",
+    "/documentation/json",
+    "/documentation/yaml",
+    "/documentation/static/*",
+  ];
+  if (
+    excludedPaths.includes(request.url) ||
+    request.url.startsWith("/documentation/")
+  ) {
     return;
   }
 
   await verifyToken(request);
 });
-
-server.register(friendRoutes, { prefix: "/api" });
 
 // Define the WebSocket route
 server.get("/ws", { websocket: true }, (connection: WebSocket) => {
