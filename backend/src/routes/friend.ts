@@ -99,19 +99,16 @@ export async function friendRoutes(fastify: FastifyInstance) {
         },
         response: {
           200: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                friends: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      friendId: { type: "string" },
-                      name: { type: "string" },
-                      email: { type: "string" },
-                    },
+            type: "object",
+            properties: {
+              friends: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    friendId: { type: "string" },
+                    name: { type: "string" },
+                    email: { type: "string" },
                   },
                 },
               },
@@ -155,7 +152,7 @@ export async function friendRoutes(fastify: FastifyInstance) {
                   userId: { type: "number" },
                   name: { type: "string" },
                   email: { type: "string" },
-                  achievementPoints: { type: "number" },
+                  achievementPoint: { type: "number" },
                 },
               },
             },

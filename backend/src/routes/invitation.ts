@@ -49,7 +49,7 @@ export async function invitationRoutes(fastify: FastifyInstance) {
   );
 
   fastify.get<{ Params: { userId: string } }>(
-    "/invitation/:receiverId",
+    "/invitation/:userId",
     {
       schema: {
         tags: ["invitation"],
@@ -142,6 +142,9 @@ export async function invitationRoutes(fastify: FastifyInstance) {
         body: {
           type: "object",
           required: ["invitationId"],
+          properties: {
+            invitationId: { type: "number" },
+          },
         },
         response: {
           200: {

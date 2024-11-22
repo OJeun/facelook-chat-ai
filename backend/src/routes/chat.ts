@@ -43,7 +43,7 @@ export async function chatRoutes(fastify: FastifyInstance) {
           200: {
             type: "object",
             properties: {
-              chatList: {
+              chat: {
                 type: "array",
                 items: {
                   type: "object",
@@ -114,6 +114,54 @@ export async function chatRoutes(fastify: FastifyInstance) {
       try {
         const response = await axios.get(
           process.env.DB_API_URL + `api/chat/20Chats/${request.params.groupId}`
+        );
+        return response.data;
+      } catch (error) {
+        errorHandler(error, reply);
+      }
+    }
+  );
+
+  fastify.get<{ Params: { groupId: number } }>(
+    "/chat/allChats/:groupId",
+    {
+      schema: {
+        tags: ["chat"],
+        description: "Get all chats for the group",
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: "object",
+          properties: {
+            groupId: { type: "number" },
+          },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              chats: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    chatId: { type: "number" },
+                    groupId: { type: "number" },
+                    senderId: { type: "string" },
+                    message: { type: "string" },
+                    createdAt: { type: "string" },
+                    userId: { type: ["string", "null"] },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const response = await axios.get(
+          process.env.DB_API_URL + `api/chat/allChats/${request.params.groupId}`
         );
         return response.data;
       } catch (error) {
