@@ -73,9 +73,9 @@ export async function friendRoutes(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       try {
-        const response = await axios.delete(
+        const response = await axios.post(
           process.env.DB_API_URL + "api/friend/delete",
-          { data: request.body }
+          request.body
         );
         return response.data;
       } catch (error) {
@@ -124,6 +124,49 @@ export async function friendRoutes(fastify: FastifyInstance) {
       try {
         const response = await axios.get(
           process.env.DB_API_URL + `api/friend/${request.params.userId}`
+        );
+        return response.data;
+      } catch (error) {
+        errorHandler(error, reply);
+      }
+    }
+  );
+
+  fastify.get<{ Params: { userId: string } }>(
+    "/user/:userId",
+    {
+      schema: {
+        tags: ["friend"],
+        description: "Get user's info",
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: "object",
+          properties: {
+            userId: { type: "string" },
+          },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              user: {
+                type: "object",
+                properties: {
+                  userId: { type: "number" },
+                  name: { type: "string" },
+                  email: { type: "string" },
+                  achievementPoints: { type: "number" },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const response = await axios.get(
+          process.env.DB_API_URL + `api/user/${request.params.userId}`
         );
         return response.data;
       } catch (error) {

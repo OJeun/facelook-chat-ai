@@ -2,6 +2,7 @@
 import fastify, { FastifyInstance, FastifyRequest } from "fastify";
 import { authRoutes } from "./routes/auth";
 import { friendRoutes } from "./routes/friend";
+import { groupRoutes } from "./routes/group";
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "./models/server";
 import fastifyWebsocket from "@fastify/websocket";
@@ -79,6 +80,7 @@ server.register(swaggerUi, {
 
 server.register(authRoutes, { prefix: "/api" });
 server.register(friendRoutes, { prefix: "/api" });
+server.register(groupRoutes, { prefix: "/api" });
 
 const verifyToken = async (request: FastifyRequest) => {
   try {
