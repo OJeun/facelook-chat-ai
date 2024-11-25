@@ -3,7 +3,7 @@ import { MessageWithTimestamp } from "../models/chat";
 
 dotenv.config();
 
-export async function saveMessage(groupId: string, messages: MessageWithTimestamp[]) {
+export async function saveMessagesToDB(groupId: string, messages: MessageWithTimestamp[]) {
     console.log(`Saving ${messages.length} messages for group ${groupId} to MySQL.`);
     const db_api_url = process.env.DB_API_URL + 'api/chat/saveChats';
 
@@ -41,6 +41,4 @@ export async function saveMessage(groupId: string, messages: MessageWithTimestam
 
     return await response.json() as any[];
     };
-
-
 
