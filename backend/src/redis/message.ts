@@ -1,9 +1,9 @@
 import { redisClient } from "./client";
-import { Message } from "../models/chat";
+import { Message, MessageWithTimestamp } from "../models/chat";
 
 // Save a message to the group's message list
 export async function saveMessage(message: Message) {
-  const messageData = {
+  const messageData: MessageWithTimestamp = {
     ...message,
     createdAt: new Date().toISOString(),
   };
