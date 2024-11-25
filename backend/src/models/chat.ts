@@ -1,7 +1,12 @@
 // Define the structure for individual messages
 interface Message {
+  groupId: string;
+  senderId: string;
   message: string;
-  userId: string;
+}
+
+interface MessageWithTimestamp extends Message {
+  timestamp: number;
 }
 
 interface UserSentimentScore {
@@ -37,10 +42,11 @@ interface EmojiGenerationResult {
 }
 
 export {
-  Chat,
-  Message,
-  AnalysisResult,
-  AddAchievementScore,
-  EmojiGenerationResult,
-  FullAnalysisResult,
+    Chat,
+    Message,
+    AnalysisResult,
+    AddAchievementScore,
+    EmojiGenerationResult,
+    FullAnalysisResult,
+    MessageWithTimestamp,
 };
