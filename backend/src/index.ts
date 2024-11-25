@@ -2,11 +2,13 @@
 import fastify, { FastifyInstance, FastifyRequest } from "fastify";
 import { authRoutes } from "./routes/auth";
 import { friendRoutes } from "./routes/friend";
+import { chatRoutes } from "./routes/chat";
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "./models/server";
 import fastifyWebsocket from "@fastify/websocket";
-import Redis from "ioredis-mock";
+// import Redis from "ioredis-mock";
 import { WebSocket } from "ws";
+import { setupWebsocket } from "./sockets/websocket";
 
 //add websocket
 
@@ -21,26 +23,11 @@ const server: FastifyInstance = fastify({
       : true, // 在生产环境中使用默认日志配置
 });
 
-const redis = new Redis(); // Mocked Redis instance
-redis.set("key", "value", "EX", 10); // Temporary cache with expiration
-redis.get("key").then((value: any) => console.log("Cached Value:", value));
-
 // add error handling
 process.on("unhandledRejection", (err) => {
   console.error("unhandled rejection:", err);
   process.exit(1);
 });
-
-// register plugins
-server.register(require("@fastify/cors"), {
-  origin: true, // allow all origins
-});
-server.register(require("@fastify/formbody"));
-server.register(fastifyWebsocket, {
-  options: {
-    maxPayload: 1048576, // 1MB
-  },
-}); //register websocket
 
 // health check route
 server.get("/health", async () => {
@@ -48,7 +35,17 @@ server.get("/health", async () => {
 });
 
 // register routes
-server.register(authRoutes, { prefix: "/api" }); // add api prefix
+server.register(require("@fastify/cors"), {
+  origin: true, // allow all origins
+});
+// register plugins
+server.register(require("@fastify/formbody"));
+
+server.register(authRoutes, { prefix: "/api" });
+server.register(chatRoutes, { prefix: "/api" }); 
+
+// Define the WebSocket route e.g.) "ws://localhost:3001/ws?groupId=12345"
+setupWebsocket(server);
 
 const verifyToken = async (request: FastifyRequest) => {
   try {
@@ -83,27 +80,8 @@ server.addHook("preHandler", async (request) => {
 
 server.register(friendRoutes, { prefix: "/api" });
 
-// Define the WebSocket route
-server.get("/ws", { websocket: true }, (connection: WebSocket) => {
-  console.log("new WebSocket connection established");
 
-  connection.on("message", (message: Buffer) => {
-    try {
-      console.log("received message:", message.toString());
-      connection.send("Hello from server!");
-    } catch (error) {
-      console.error("error when processing message:", error);
-    }
-  });
 
-  connection.on("error", (error: any) => {
-    console.error("WebSocket error:", error);
-  });
-
-  connection.on("close", () => {
-    console.log("connection closed");
-  });
-});
 
 const start = async () => {
   try {
