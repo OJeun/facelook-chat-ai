@@ -5,8 +5,8 @@ import {
 } from "../services/databaseService";
 import { getRecentMessages } from "../redis/message";
 
-export function registerChatRoutes(server: FastifyInstance) {
-  server.post("/api/chat/saveChats", async (request, response) => {
+export function chatRoutes(server: FastifyInstance) {
+  server.post("/chat/saveChats", async (request, response) => {
     const { groupId, chatList } = request.body as any;
 
     try {
@@ -19,7 +19,7 @@ export function registerChatRoutes(server: FastifyInstance) {
     }
   });
 
-  server.get("/api/chat/getChats", async (request, reply) => {
+  server.get("/chat/getChats", async (request, reply) => {
     const { groupId, offset, limit } = request.query as {
       groupId: string;
       offset: string;
