@@ -9,6 +9,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DB_API_URL=${DB_API_URL}
+      - REDIS_URL=${REDIS_URL}
     restart: always
     deploy:
       restart_policy:
