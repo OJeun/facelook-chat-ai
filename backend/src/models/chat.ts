@@ -6,7 +6,7 @@ interface Message {
 }
 
 interface MessageWithTimestamp extends Message {
-  timestamp: number;
+  createdAt: string;
 }
 
 interface UserSentimentScore {
