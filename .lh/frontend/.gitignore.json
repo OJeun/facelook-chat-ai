@@ -1,0 +1,18 @@
+{
+    "sourceFile": "frontend/.gitignore",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1729982559887,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1729982559887,
+            "name": "Commit-0",
+            "content": "# Xcode\r\n#\r\n# gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore\r\n\r\n## User settings\r\nxcuserdata/\r\n\r\n## compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)\r\n*.xcscmblueprint\r\n*.xccheckout\r\n\r\n## compatibility with Xcode 3 and earlier (ignoring not required starting Xcode 4)\r\nbuild/\r\nDerivedData/\r\n\r\n## Various settings\r\n*.pbxuser\r\n!default.pbxuser\r\n*.mode1v3\r\n!default.mode1v3\r\n*.mode2v3\r\n!default.mode2v3\r\n*.perspectivev3\r\n!default.perspectivev3\r\n\r\n## Obj-C/Swift specific\r\n*.hmap\r\n*.ipa\r\n*.dSYM.zip\r\n*.dSYM\r\n\r\n## Playgrounds\r\ntimeline.xctimeline\r\nplayground.xcworkspace\r\n\r\n# Swift Package Manager\r\n#\r\n# Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.\r\n# Packages/\r\n# Package.pins\r\n# Package.resolved\r\n# *.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved\r\n.build/\r\n\r\n# CocoaPods\r\n#\r\n# We recommend against adding the Pods directory.\r\n# Alternatively, you can customize this rule to avoid checking in source code from the Pods directory.\r\nPods/\r\n# Add this line if you want to avoid checking in source code from the Pods directory.\r\n# Pods/\r\n\r\n# Carthage\r\n#\r\n# Add this line if you want to avoid checking in source code from Carthage dependencies.\r\nCarthage/Build/\r\n\r\n# fastlane\r\n#\r\n# It is recommended to not store the screenshots in the git repository.\r\n# Instead, use fastlane to re-generate the screenshots whenever they are needed.\r\n# For more information about the recommended setup visit:\r\n# https://docs.fastlane.tools/best-practices/source-control/\r\nfastlane/report.xml\r\nfastlane/Preview.html\r\nfastlane/screenshots/**/*.png\r\nfastlane/test_output\r\n\r\n# Code Injection\r\n#\r\n# Avoid checking in source code from the InjectionIII app.\r\n# For more information visit:\r\n# https://github.com/johnno1962/InjectionIII\r\niOSInjectionProject/\r\n\r\n# AppCode\r\n#\r\n# AppCode generates a number of temporary files, which can be safely ignored.\r\n.idea/"
+        }
+    ]
+}

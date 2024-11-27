@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import axios from "axios";
 import dotenv from "dotenv";
 import { errorHandler } from "../services/dbErrorHandler";
+// import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -37,14 +38,15 @@ export async function authRoutes(fastify: FastifyInstance) {
             type: "object",
             properties: {
               message: { type: "string" },
+              token: { type: "string" },
               user: {
                 type: "object",
                 properties: {
                   userId: { type: "number" },
                   email: { type: "string" },
                   name: { type: "string" },
-                  updatedAt: { type: "string" },
-                  createdAt: { type: "string" },
+                  password: { type: "string" },
+                  achievementPoint: { type: "number" },
                 },
               },
             },
@@ -52,18 +54,17 @@ export async function authRoutes(fastify: FastifyInstance) {
         },
       },
     },
-    async (request) => {
+    async (request, reply) => {
       try {
         const response = await axios.post(
           process.env.DB_API_URL + "api/auth/register",
           request.body
         );
         return response.data;
-      } catch (error) {
-        errorHandler(
-          error,
-          "register failed, please check if your email is already in use"
-        );
+      } catch (error: any) {
+        error.backendMessage =
+          "register failed, please check if your email is already in use";
+        errorHandler(error, reply);
       }
     }
   );
@@ -88,7 +89,16 @@ export async function authRoutes(fastify: FastifyInstance) {
             properties: {
               token: { type: "string" },
               message: { type: "string" },
-              userId: { type: "string" },
+              user: {
+                type: "object",
+                properties: {
+                  userId: { type: "number" },
+                  email: { type: "string" },
+                  name: { type: "string" },
+                  password: { type: "string" },
+                  achievementPoint: { type: "number" },
+                },
+              },
             },
           },
         },
@@ -100,7 +110,15 @@ export async function authRoutes(fastify: FastifyInstance) {
           process.env.DB_API_URL + "api/auth/login",
           request.body
         );
-        return response.data;
+
+        if (response.status === 500) {
+          return {
+            statusCode: 401,
+            message: "login failed, please check your email and password",
+          };
+        } else {
+          return response.data;
+        }
       } catch (error) {
         errorHandler(error, reply);
       }

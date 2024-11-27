@@ -7,6 +7,8 @@ DerivedData/
 !*.xcodeproj/xcshareddata/
 !*.xcodeproj/xcshareddata/.*
 
+.lh
+
 # Swift Package Manager
 .build/
 .swiftpm/

@@ -149,7 +149,6 @@ export async function chatRoutes(fastify: FastifyInstance) {
                     senderId: { type: "string" },
                     message: { type: "string" },
                     createdAt: { type: "string" },
-                    userId: { type: ["string", "null"] },
                   },
                 },
               },

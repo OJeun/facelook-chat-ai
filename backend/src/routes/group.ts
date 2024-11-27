@@ -9,7 +9,7 @@ interface GroupRequest {
 
 export async function groupRoutes(fastify: FastifyInstance) {
   fastify.post<{ Body: GroupRequest }>(
-    "/invitation/create",
+    "/group/create",
     {
       schema: {
         tags: ["group"],
@@ -44,7 +44,7 @@ export async function groupRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const response = await axios.post(
-          process.env.DB_API_URL + "api/invitation/create",
+          process.env.DB_API_URL + "api/group/create",
           request.body
         );
         return response.data;
