@@ -152,7 +152,7 @@ export async function friendRoutes(fastify: FastifyInstance) {
                   userId: { type: "number" },
                   name: { type: "string" },
                   email: { type: "string" },
-                  achievementPoint: { type: "number" },
+                  acheivementPoint: { type: "number" },
                 },
               },
             },
