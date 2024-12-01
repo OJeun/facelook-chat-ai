@@ -8,10 +8,12 @@ import { chatRoutes } from "./routes/chat";
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "./models/server";
 import fastifyWebsocket from "@fastify/websocket";
+import { analyzeAllChats } from "./services/openai";
 // import Redis from "ioredis-mock";
 import { WebSocket } from "ws";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
+import { chatOne, chatTwo, chatThree } from "./constants/testData";
 
 //add websocket
 
@@ -25,6 +27,9 @@ const server: FastifyInstance = fastify({
         }
       : true, // only use in development
 });
+
+// test the sentiment analysis function
+analyzeAllChats([chatOne, chatTwo, chatThree]); //return all results as result []
 
 // const redis = new Redis(); // Mocked Redis instance
 // redis.set("key", "value", "EX", 10); // Temporary cache with expiration
