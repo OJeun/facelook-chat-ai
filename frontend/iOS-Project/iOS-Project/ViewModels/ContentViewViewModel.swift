@@ -9,10 +9,16 @@ import Foundation
 import SwiftUI
 
 class ContentViewViewModel: ObservableObject {
-    @Published var isLoggedIn: Bool = false
+    @Published var isLoggedIn = false
+    @Published var userID: Int = 0
 
     func checkLoginStatus() {
-        // Assume the user is logged out by default
-        isLoggedIn = false
+        if let savedUserID = UserDefaults.standard.value(forKey: "userID") as? Int {
+            isLoggedIn = true
+            userID = savedUserID
+        } else {
+            isLoggedIn = false
+            userID = 0
+        }
     }
 }

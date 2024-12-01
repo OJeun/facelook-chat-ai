@@ -9,7 +9,7 @@ import SwiftUI
 
 struct LoginView: View {
     @StateObject private var viewModel = LoginViewViewModel()
-    let onLoginSuccess: () -> Void
+    let onLoginSuccess: (Int) -> Void
 
     var body: some View {
         VStack {
@@ -35,8 +35,8 @@ struct LoginView: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
 
                 Button("Log In") {
-                    viewModel.login {
-                        onLoginSuccess()
+                    viewModel.login { userID in
+                        onLoginSuccess(userID)
                     }
                 }
                 .buttonStyle(.borderedProminent)
@@ -50,7 +50,7 @@ struct LoginView: View {
 }
 
 #Preview {
-    LoginView(onLoginSuccess: {
-        print("Login successful!")
+    LoginView(onLoginSuccess: { userID in
+        print("Login successful! User ID: \(userID)")
     })
 }

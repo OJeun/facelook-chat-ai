@@ -13,10 +13,12 @@ class LoginViewViewModel: ObservableObject {
     @Published var email = ""
     @Published var password = ""
     @Published var errorMessage = ""
+    @Published var token: String? = nil
+    @Published var userId: Int? = nil
 
     private var cancellables = Set<AnyCancellable>()
 
-    func login(onSuccess: @escaping () -> Void) {
+    func login(onSuccess: @escaping (Int) -> Void) {
         errorMessage = ""
 
         guard validateInput() else { return }
@@ -68,16 +70,30 @@ class LoginViewViewModel: ObservableObject {
         return true
     }
 
-    private func handleSuccessfulLogin(response: LoginResponse, onSuccess: @escaping () -> Void) {
-        // Log user details
+    private func handleSuccessfulLogin(response: LoginResponse, onSuccess: @escaping (Int) -> Void) {
+        // Store the token and userId
+        self.token = response.token
+        self.userId = response.user.userId
+
+        // Save the token and userId for future use
+        UserDefaults.standard.set(response.token, forKey: "authToken")
+        UserDefaults.standard.set(response.user.userId, forKey: "userID")
+
+        // Notify via callback with the userId
+        onSuccess(response.user.userId)
+
         print("Login successful!")
         print("User Details:")
         print("  UserID: \(response.user.userId)")
         print("  Name: \(response.user.name)")
         print("  Achievement Points: \(response.user.achievementPoint)")
         print("  Token: \(response.token)")
+    }
 
-        // Notify via callback
-        onSuccess()
+    static func getAuthorizationHeader() -> [String: String]? {
+        guard let token = UserDefaults.standard.string(forKey: "authToken") else {
+            return nil
+        }
+        return ["Authorization": "Bearer \(token)"]
     }
 }

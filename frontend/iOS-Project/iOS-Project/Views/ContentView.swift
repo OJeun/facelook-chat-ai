@@ -11,32 +11,33 @@ struct ContentView: View {
     @StateObject private var viewModel = ContentViewViewModel()
 
     var body: some View {
-        Group {
-            if viewModel.isLoggedIn {
-                TabView {
-                    HomeView()
-                        .tabItem {
-                            Label("Home", systemImage: "house")
-                        }
+        if viewModel.isLoggedIn {
+            TabView {
+                // Pass userID to HomeView
+                HomeView(userID: viewModel.userID)
+                    .tabItem {
+                        Label("Home", systemImage: "house")
+                    }
 
-                    ProfileView()
-                        .tabItem {
-                            Label("Profile", systemImage: "person.circle")
-                        }
+                ProfileView()
+                    .tabItem {
+                        Label("Profile", systemImage: "person.circle")
+                    }
 
-                    LeaderboardView()
-                        .tabItem {
-                            Label("Leaderboard", systemImage: "chart.bar")
-                        }
-                }
-            } else {
-                LoginView(onLoginSuccess: {
-                    viewModel.isLoggedIn = true
-                })
+                LeaderboardView()
+                    .tabItem {
+                        Label("Leaderboard", systemImage: "chart.bar")
+                    }
             }
-        }
-        .onAppear {
-            viewModel.checkLoginStatus()
+            .onAppear {
+                viewModel.checkLoginStatus()
+            }
+        } else {
+            LoginView(onLoginSuccess: { userID in
+                print("Login successful with userID: \(userID)")
+                viewModel.isLoggedIn = true
+                viewModel.userID = userID
+            })
         }
     }
 }
