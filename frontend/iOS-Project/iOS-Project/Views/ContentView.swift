@@ -8,22 +8,35 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var viewModel = ContentViewViewModel()
+
     var body: some View {
-        TabView {
-            HomeView()
-                .tabItem {
-                    Label("Home", systemImage: "house")
+        Group {
+            if viewModel.isLoggedIn {
+                TabView {
+                    HomeView()
+                        .tabItem {
+                            Label("Home", systemImage: "house")
+                        }
+
+                    ProfileView()
+                        .tabItem {
+                            Label("Profile", systemImage: "person.circle")
+                        }
+
+                    LeaderboardView()
+                        .tabItem {
+                            Label("Leaderboard", systemImage: "chart.bar")
+                        }
                 }
-            
-            ProfileView()
-                .tabItem {
-                    Label("Profile", systemImage: "person.circle")
-                }
-            
-            LeaderboardView()
-                .tabItem {
-                    Label("Leaderboard", systemImage: "chart.bar")
-                }
+            } else {
+                LoginView(onLoginSuccess: {
+                    viewModel.isLoggedIn = true
+                })
+            }
+        }
+        .onAppear {
+            viewModel.checkLoginStatus()
         }
     }
 }
