@@ -18,7 +18,6 @@ yarn-error.log*
 # TypeScript build artifacts
 dist/
 build/
-.lh
 
 # Optional npm cache directory
 .npm/
