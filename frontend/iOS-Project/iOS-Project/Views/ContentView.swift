@@ -13,8 +13,7 @@ struct ContentView: View {
     var body: some View {
         if viewModel.isLoggedIn {
             TabView {
-                // Pass userID to HomeView
-                HomeView(userID: viewModel.userID)
+                HomeView(userID: viewModel.userID, userName: viewModel.userName)
                     .tabItem {
                         Label("Home", systemImage: "house")
                     }
@@ -33,10 +32,13 @@ struct ContentView: View {
                 viewModel.checkLoginStatus()
             }
         } else {
-            LoginView(onLoginSuccess: { userID in
-                print("Login successful with userID: \(userID)")
+            LoginView(onLoginSuccess: { userID, userName in
+                print("Login successful with userID: \(userID), userName: \(userName)")
                 viewModel.isLoggedIn = true
                 viewModel.userID = userID
+                viewModel.userName = userName
+                UserDefaults.standard.set(userID, forKey: "userID")
+                UserDefaults.standard.set(userName, forKey: "userName")
             })
         }
     }

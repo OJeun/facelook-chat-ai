@@ -17,6 +17,5 @@ struct User: Codable {
     let userId: Int
     let email: String
     let name: String
-    let password: String
     let achievementPoint: Int
 }

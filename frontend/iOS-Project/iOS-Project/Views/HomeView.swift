@@ -9,7 +9,7 @@ import SwiftUI
 
 // Align the UserGroup struct with the API response
 struct UserGroup: Identifiable, Codable {
-    let id: Int
+    let id: Int // Updated to Int for groupId
     let name: String
 
     enum CodingKeys: String, CodingKey {
@@ -35,123 +35,96 @@ struct GroupDetails: Codable {
 
 struct HomeView: View {
     let userID: Int
+    let userName: String // Include user's name for displaying in ChatView
     @State private var groups: [UserGroup] = []
     @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
     @State private var showCreateGroupForm = false
     @State private var groupName = ""
+    @State private var selectedGroup: UserGroup?
 
     var body: some View {
-        VStack {
-            // Top Navigation Bar
-            HStack {
-                Spacer()
-                RoundedRectangle(cornerRadius: 10)
-                    .frame(height: 36)
-                    .foregroundColor(.gray.opacity(0.2))
-                    .overlay(
-                        HStack {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(.gray)
-                            Text("Search")
-                                .foregroundColor(.gray)
-                        }
-                        .padding(.horizontal)
-                    )
-                Spacer()
-                Image(systemName: "magnifyingglass")
-                    .imageScale(.large)
-                    .padding(.trailing)
-            }
-            .padding(.vertical)
-
-            // Group Content
-            HStack(alignment: .top, spacing: 16) {
-                // Group Chat Icons
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 16) {
-                        if isLoading {
-                            ProgressView()
-                        } else if let errorMessage = errorMessage {
-                            Text(errorMessage)
-                                .foregroundColor(.red)
-                        } else if groups.isEmpty {
-                            Text("You have no groups.")
-                                .foregroundColor(.gray)
-                                .font(.headline)
-                        } else {
-                            ForEach(groups) { group in
-                                Circle()
-                                    .frame(width: 50, height: 50)
-                                    .foregroundColor(.blue.opacity(0.3))
-                                    .overlay(
-                                        Text(group.name)
-                                            .font(.caption)
-                                            .multilineTextAlignment(.center)
-                                    )
-                            }
-                        }
-                    }
-                }
-                .padding(.leading)
-                .padding(.top, 8)
-
-                // Chat List Placeholder
-                ScrollView {
-                    VStack(spacing: 16) {
-                        ForEach(0..<5) { _ in
-                            HStack(spacing: 16) {
-                                Circle()
-                                    .frame(width: 50, height: 50)
-                                    .foregroundColor(.gray.opacity(0.3))
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color.gray.opacity(0.2))
-                                    .frame(height: 60)
-                                    .overlay(
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text("User Name")
-                                                .font(.headline)
-                                            Text("Most recent history")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                        }
-                                        .padding(.leading, 8),
-                                        alignment: .leading
-                                    )
+        NavigationView {
+            VStack {
+                // Top Navigation Bar
+                HStack {
+                    Spacer()
+                    RoundedRectangle(cornerRadius: 10)
+                        .frame(height: 36)
+                        .foregroundColor(.gray.opacity(0.2))
+                        .overlay(
+                            HStack {
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundColor(.gray)
+                                Text("Search")
+                                    .foregroundColor(.gray)
                             }
                             .padding(.horizontal)
+                        )
+                    Spacer()
+                    Image(systemName: "magnifyingglass")
+                        .imageScale(.large)
+                        .padding(.trailing)
+                }
+                .padding(.vertical)
+
+                // Group Content
+                VStack {
+                    if isLoading {
+                        ProgressView()
+                    } else if let errorMessage = errorMessage {
+                        Text(errorMessage)
+                            .foregroundColor(.red)
+                    } else if groups.isEmpty {
+                        Text("You have no groups.")
+                            .foregroundColor(.gray)
+                            .font(.headline)
+                    } else {
+                        List(groups) { group in
+                            Button(action: {
+                                selectedGroup = group
+                            }) {
+                                Text(group.name)
+                                    .font(.headline)
+                                    .padding(.vertical, 8)
+                            }
+                            .sheet(item: $selectedGroup) { group in
+                                ChatView(viewModel: ChatViewViewModel(
+                                    groupId: group.id, // Int for groupId
+                                    currentUserId: "\(userID)",
+                                    currentUserName: userName
+                                ))
+                            }
                         }
                     }
-                    .padding(.top, 8)
                 }
-            }
-            .padding(.bottom, 8)
+                .padding()
 
-            // Create Group Button
-            Button("Create Group") {
-                showCreateGroupForm = true
-            }
-            .padding()
-            .buttonStyle(.borderedProminent)
-
-        }
-        .sheet(isPresented: $showCreateGroupForm) {
-            VStack {
-                Text("Create a New Group")
-                    .font(.headline)
-                TextField("Group Name", text: $groupName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                Button("Submit") {
-                    createGroup()
+                // Create Group Button
+                Button("Create Group") {
+                    showCreateGroupForm = true
                 }
                 .padding()
                 .buttonStyle(.borderedProminent)
             }
-            .padding()
-        }
-        .onAppear {
-            fetchGroups()
+            .sheet(isPresented: $showCreateGroupForm) {
+                VStack {
+                    Text("Create a New Group")
+                        .font(.headline)
+                    TextField("Group Name", text: $groupName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                    Button("Submit") {
+                        createGroup()
+                    }
+                    .padding()
+                    .buttonStyle(.borderedProminent)
+                }
+                .padding()
+            }
+            .onAppear {
+                fetchGroups()
+            }
         }
     }
 
@@ -248,5 +221,5 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView(userID: 22)
+    HomeView(userID: 22, userName: "Aric Or")
 }

@@ -10,15 +10,15 @@ import SwiftUI
 import Combine
 
 class LoginViewViewModel: ObservableObject {
-    @Published var email = ""
-    @Published var password = ""
-    @Published var errorMessage = ""
+    @Published var email: String = ""
+    @Published var password: String = ""
+    @Published var errorMessage: String = ""
     @Published var token: String? = nil
     @Published var userId: Int? = nil
 
     private var cancellables = Set<AnyCancellable>()
 
-    func login(onSuccess: @escaping (Int) -> Void) {
+    func login(onSuccess: @escaping (Int, String) -> Void) {
         errorMessage = ""
 
         guard validateInput() else { return }
@@ -57,30 +57,31 @@ class LoginViewViewModel: ObservableObject {
     }
 
     private func validateInput() -> Bool {
-        if email.isEmpty || password.isEmpty {
+        if email.trimmingCharacters(in: .whitespaces).isEmpty || password.trimmingCharacters(in: .whitespaces).isEmpty {
             errorMessage = "Please fill in all fields."
             return false
         }
 
         if !email.contains("@") || !email.contains(".") {
-            errorMessage = "Please enter a valid email."
+            errorMessage = "Please enter a valid email address."
             return false
         }
 
         return true
     }
 
-    private func handleSuccessfulLogin(response: LoginResponse, onSuccess: @escaping (Int) -> Void) {
+    private func handleSuccessfulLogin(response: LoginResponse, onSuccess: @escaping (Int, String) -> Void) {
         // Store the token and userId
         self.token = response.token
         self.userId = response.user.userId
 
-        // Save the token and userId for future use
+        // Save the token, userId, and optionally userName for future use
         UserDefaults.standard.set(response.token, forKey: "authToken")
         UserDefaults.standard.set(response.user.userId, forKey: "userID")
+        UserDefaults.standard.set(response.user.name, forKey: "userName")
 
-        // Notify via callback with the userId
-        onSuccess(response.user.userId)
+        // Notify via callback with userId and userName
+        onSuccess(response.user.userId, response.user.name)
 
         print("Login successful!")
         print("User Details:")
