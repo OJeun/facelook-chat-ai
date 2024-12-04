@@ -1,17 +1,28 @@
 // Define the structure for individual messages
-interface Message {
+interface redisMessage {
   groupId: string;
   senderId: string;
   message: string;
 }
 
-interface MessageWithTimestamp extends Message {
+interface redisMessageWithTimeStamp extends redisMessage {
   createdAt: string;
+}
+interface Message {
+  message: string;
+  userId: string;
+  messageId: string;
 }
 
 interface UserSentimentScore {
   score: number; // 1-10
   userId: string;
+}
+
+interface UserSentimentScoreWithAchievementScore extends UserSentimentScore {
+  score: number; // 1-10
+  userId: string;
+  achievementScore: number;
 }
 
 // Define the structure for the entire chat, this chat model is target for sentiment analysis which has all data ai needs
@@ -21,10 +32,14 @@ interface Chat {
   sentimentScores: UserSentimentScore[];
 }
 
+interface AiResult {
+  chatId: string;
+  sentimentScores: UserSentimentScore[];
+}
+
 interface AnalysisResult {
   chatId: string;
-  addAchievementScores: AddAchievementScore[];
-  sentimentScores: UserSentimentScore[];
+  sentimentScores: UserSentimentScoreWithAchievementScore[];
 }
 
 interface FullAnalysisResult extends AnalysisResult {
@@ -41,12 +56,20 @@ interface EmojiGenerationResult {
   userId: string;
 }
 
+interface EmojiWithMessageId extends EmojiGenerationResult {
+  messageId: string;
+}
+
 export {
-    Chat,
-    Message,
-    AnalysisResult,
-    AddAchievementScore,
-    EmojiGenerationResult,
-    FullAnalysisResult,
-    MessageWithTimestamp,
+  Chat,
+  redisMessage,
+  AnalysisResult,
+  AddAchievementScore,
+  EmojiGenerationResult,
+  FullAnalysisResult,
+  EmojiWithMessageId,
+  UserSentimentScoreWithAchievementScore,
+  UserSentimentScore,
+  AiResult,
+  redisMessageWithTimeStamp,
 };
