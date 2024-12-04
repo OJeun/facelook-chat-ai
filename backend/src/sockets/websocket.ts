@@ -22,9 +22,15 @@ export function setupWebsocket(server: FastifyInstance) {
   }); //register websocket
 
   server.get("/ws", { websocket: true }, async (connection, req) => {
-    console.log("req:", req); 
-    const queryString = req.url?.split("?")[1]; 
-    
+    const url = connection.url;
+    if (!url) {
+      console.error("No URL found in connection");
+      connection.close();
+      return;
+    }
+
+    const queryString = url.split("?")[1];
+
     if (!queryString) {
       console.error("No query string found in URL");
       connection.close();
