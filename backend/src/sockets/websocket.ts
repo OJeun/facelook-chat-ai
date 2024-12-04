@@ -29,23 +29,16 @@ export function setupWebsocket(server: FastifyInstance) {
       return;
     }
 
-    const queryString = url.split("?")[1];
-
-    if (!queryString) {
-      console.error("No query string found in URL");
+    const groupId = url.split("?")[1];
+    if (!groupId) {
+      console.error("No group id found in URL");
       connection.close();
       return;
     }
 
-    const query = parse(queryString);
-    const groupId = query.groupId as string;
 
     console.log("WebSocket handshake successful for group:", groupId);
 
-    if (!groupId) {
-      connection.close();
-      return;
-    }
 
     if (!connectedClients[groupId]) {
       connectedClients[groupId] = new Set();
