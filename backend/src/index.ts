@@ -111,6 +111,7 @@ server.addHook("preHandler", async (request) => {
     "/documentation/json",
     "/documentation/yaml",
     "/documentation/static/*",
+    "/ws",
   ];
   if (
     excludedPaths.includes(request.url) ||
