@@ -4,7 +4,7 @@ import { createClient } from "redis";
 export const redisClient = createClient({ url: process.env.REDIS_URL });
 
 export async function initializeRedis() {
-  console.log(process.env.REDIS_URL);
+  console.log("Redis URL!!:", process.env.REDIS_URL);
   try {
     await redisClient.connect();
     console.log("Redis connected successfully");
