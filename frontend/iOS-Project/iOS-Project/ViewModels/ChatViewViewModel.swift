@@ -48,9 +48,11 @@ class ChatViewViewModel: ObservableObject {
                 switch message {
                 case .string(let text):
                     if let data = text.data(using: .utf8),
-                       let receivedMessage = try? JSONDecoder().decode(Message.self, from: data) {
-                        DispatchQueue.main.async {
-                            self.messages.append(receivedMessage)
+                    let response = try? JSONDecoder().decode(WebSocketResponse.self, from: data) {
+                        if response.type == "recentMessages", let messages = response.messages {
+                            DispatchQueue.main.async {
+                                self.messages.append(contentsOf: messages)
+                            }
                         }
                     } else {
                         print("Failed to decode message: \(text)")
