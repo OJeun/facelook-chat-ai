@@ -104,6 +104,7 @@ const verifyToken = async (request: FastifyRequest) => {
 // add verifyToken hook, but exclude some paths
 server.addHook("preHandler", async (request) => {
   const excludedPaths = [
+    "/",
     "/health",
     "/api/auth/login",
     "/api/auth/register",
