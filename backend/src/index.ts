@@ -114,8 +114,11 @@ server.addHook("preHandler", async (request) => {
     "/documentation/static/*",
     "/ws",
   ];
+
+  const cleanUrl = request.url.split("?")[0]; 
+
   if (
-    excludedPaths.includes(request.url) ||
+    excludedPaths.includes(cleanUrl) ||
     request.url.startsWith("/documentation/")
   ) {
     return;
