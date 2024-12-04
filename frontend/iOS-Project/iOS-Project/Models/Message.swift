@@ -25,3 +25,8 @@ struct Message: Identifiable, Codable, Equatable {
         return createdAt
     }
 }
+
+struct WebSocketResponse: Decodable {
+    let type: String
+    let messages: [Message]?
+}
