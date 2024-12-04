@@ -8,7 +8,6 @@ import {
 } from "../redis/message";
 import { WebSocket } from "ws";
 import { dumpMessagesToDB } from "../redis/dumpService";
-import { parse } from "querystring";
 
 
 const connectedClients: Record<string, Set<WebSocket>> = {};
@@ -23,6 +22,9 @@ export function setupWebsocket(server: FastifyInstance) {
 
   server.get("/ws", { websocket: true }, async (connection, req) => {
     const url = connection.url;
+    console.log("url!!!", url);
+    console.log("req.url!!!", req.connection);
+    
     if (!url) {
       console.error("No URL found in connection");
       connection.close();
