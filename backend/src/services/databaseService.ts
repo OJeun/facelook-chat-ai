@@ -12,6 +12,8 @@ export async function saveMessagesToDB(
   );
   const db_api_url = process.env.DB_API_URL + "api/chat/saveChats";
 
+  console.log(messages);
+
   const response = await fetch(db_api_url, {
     method: "POST",
     headers: {

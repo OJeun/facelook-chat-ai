@@ -5,6 +5,7 @@ import { Mutex } from "async-mutex";
 const groupLocks: Record<string, Mutex> = {};
 
 export async function dumpMessagesToDB(groupId: string) {
+    console.log(`Dumping messages for group ${groupId}, time: ${new Date().toISOString()}`);
     if (!groupLocks[groupId]) {
       groupLocks[groupId] = new Mutex();
     }
