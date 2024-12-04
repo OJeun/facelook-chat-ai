@@ -21,10 +21,11 @@ export function setupWebsocket(server: FastifyInstance) {
   }); //register websocket
 
   server.get("/ws", { websocket: true }, async (connection, req) => {
-    console.log("req.raw.url", req.raw.url);
-    console.log("req.url.split", req.raw.url!.split("?"));
+    console.log("req", req);
+    console.log(req.query);
 
-    const groupId = req.raw.url!.split("?")[1].split("=")[1];
+    const query = req.query as { groupId: string };
+    const groupId = query.groupId;
 
     console.log("WebSocket handshake successful for group:", groupId);
 
