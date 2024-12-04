@@ -3,11 +3,15 @@ import fastify, { FastifyInstance, FastifyRequest } from "fastify";
 import { authRoutes } from "./routes/auth";
 import { friendRoutes } from "./routes/friend";
 import { chatRoutes } from "./routes/chat";
+import { groupRoutes } from "./routes/group";
+import { invitationRoutes } from "./routes/invitation";
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "./models/server";
-import fastifyWebsocket from "@fastify/websocket";
+// import fastifyWebsocket from "@fastify/websocket";
 // import Redis from "ioredis-mock";
-import { WebSocket } from "ws";
+// import { WebSocket } from "ws";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
 import { setupWebsocket } from "./sockets/websocket";
 
 //add websocket
@@ -20,7 +24,7 @@ const server: FastifyInstance = fastify({
             target: "pino-pretty",
           },
         }
-      : true, // 在生产环境中使用默认日志配置
+      : true,
 });
 
 // add error handling
@@ -35,6 +39,34 @@ server.get("/health", async () => {
 });
 
 // register routes
+server.register(swagger, {
+  openapi: {
+    info: {
+      title: "Facelook API Documentation",
+      description: "API documentation for Facelook backend services",
+      version: "1.0.0",
+    },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "apiKey",
+          name: "Authorization",
+          in: "header",
+        },
+      },
+    },
+  },
+});
+
+server.register(swaggerUi, {
+  routePrefix: "/documentation",
+  uiConfig: {
+    docExpansion: "list",
+    deepLinking: false,
+  },
+});
+
+// register routes
 server.register(require("@fastify/cors"), {
   origin: true, // allow all origins
 });
@@ -42,10 +74,10 @@ server.register(require("@fastify/cors"), {
 server.register(require("@fastify/formbody"));
 
 server.register(authRoutes, { prefix: "/api" });
-server.register(chatRoutes, { prefix: "/api" }); 
-
-// Define the WebSocket route e.g.) "ws://localhost:3001/ws?groupId=12345"
-setupWebsocket(server);
+server.register(friendRoutes, { prefix: "/api" });
+server.register(groupRoutes, { prefix: "/api" });
+server.register(invitationRoutes, { prefix: "/api" });
+server.register(chatRoutes, { prefix: "/api" });
 
 const verifyToken = async (request: FastifyRequest) => {
   try {
@@ -70,18 +102,27 @@ const verifyToken = async (request: FastifyRequest) => {
 
 // add verifyToken hook, but exclude some paths
 server.addHook("preHandler", async (request) => {
-  const excludedPaths = ["/health", "/api/auth/login", "/api/auth/register"];
-  if (excludedPaths.includes(request.url)) {
+  const excludedPaths = [
+    "/health",
+    "/api/auth/login",
+    "/api/auth/register",
+    "/documentation",
+    "/documentation/json",
+    "/documentation/yaml",
+    "/documentation/static/*",
+  ];
+  if (
+    excludedPaths.includes(request.url) ||
+    request.url.startsWith("/documentation/")
+  ) {
     return;
   }
 
   await verifyToken(request);
 });
 
-server.register(friendRoutes, { prefix: "/api" });
-
-
-
+// Define the WebSocket route e.g.) "ws://localhost:3001/ws?groupId=12345"
+setupWebsocket(server);
 
 const start = async () => {
   try {

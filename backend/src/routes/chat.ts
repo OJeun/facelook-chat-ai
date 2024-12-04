@@ -1,53 +1,171 @@
 import { FastifyInstance } from "fastify";
-import {
-  saveMessagesToDB,
-  getMessagesFromDB,
-} from "../services/databaseService";
-import { getRecentMessages } from "../redis/message";
+import axios from "axios";
+import { errorHandler } from "../services/dbErrorHandler";
 
-export function chatRoutes(server: FastifyInstance) {
-  server.post("/chat/saveChats", async (request, response) => {
-    const { groupId, chatList } = request.body as any;
+interface Chat {
+  groupId: number;
+  senderId: number;
+  message: string;
+  createdAt: string;
+}
 
-    try {
-      await saveMessagesToDB(groupId, chatList);
-      response.send({ success: true });
-    } catch (error) {
-      response
-        .status(500)
-        .send({ success: false, message: "Failed to save chats" });
+interface ChatListSaveRequest {
+  chatList: Chat[];
+}
+
+export async function chatRoutes(fastify: FastifyInstance) {
+  fastify.post<{ Body: ChatListSaveRequest }>(
+    "/chat/saveChats",
+    {
+      schema: {
+        tags: ["chat"],
+        description: "Save chat list",
+        security: [{ bearerAuth: [] }],
+        body: {
+          type: "object",
+          required: ["chatList"],
+          properties: {
+            chatList: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  groupId: { type: "number" },
+                  senderId: { type: "number" },
+                  message: { type: "string" },
+                  createdAt: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              chat: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    chatId: { type: "number" },
+                    groupId: { type: "number" },
+                    senderId: { type: "number" },
+                    message: { type: "string" },
+                    createdAt: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const response = await axios.post(
+          process.env.DB_API_URL + "api/chat/saveChats",
+          request.body
+        );
+        return response.data;
+      } catch (error) {
+        errorHandler(error, reply);
+      }
     }
-  });
+  );
 
-  server.get("/chat/getChats", async (request, reply) => {
-    const { groupId, offset, limit } = request.query as {
-      groupId: string;
-      offset: string;
-      limit: string;
-    };
-    const parsedOffset = parseInt(offset, 10) || 0;
-    const parsedLimit = parseInt(limit, 10) || 20;
-
-    const recentMessages = await getRecentMessages(groupId, parsedLimit);
-    const recentCount = recentMessages.length;
-
-    if (recentCount >= parsedLimit) {
-      return reply.send({ messages: recentMessages });
+  fastify.get<{ Params: { groupId: number } }>(
+    "/chat/20Chats/:groupId",
+    {
+      schema: {
+        tags: ["chat"],
+        description: "Get last 20 chats for the group",
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: "object",
+          properties: {
+            groupId: { type: "number" },
+          },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              chats: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    chatId: { type: "number" },
+                    groupId: { type: "number" },
+                    senderId: { type: "string" },
+                    message: { type: "string" },
+                    createdAt: { type: "string" },
+                    userId: { type: ["string", "null"] },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const response = await axios.get(
+          process.env.DB_API_URL + `api/chat/20Chats/${request.params.groupId}`
+        );
+        return response.data;
+      } catch (error) {
+        errorHandler(error, reply);
+      }
     }
+  );
 
-    const remaining = parsedLimit - recentCount;
-
-    try {
-      const olderMessages = await getMessagesFromDB(
-        groupId,
-        parsedOffset,
-        remaining
-      );
-      reply.send({ messages: [...olderMessages, ...recentMessages] });
-    } catch (error) {
-      reply
-        .status(500)
-        .send({ success: false, message: "Failed to retrieve chats" });
+  fastify.get<{ Params: { groupId: number } }>(
+    "/chat/allChats/:groupId",
+    {
+      schema: {
+        tags: ["chat"],
+        description: "Get all chats for the group",
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: "object",
+          properties: {
+            groupId: { type: "number" },
+          },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              chats: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    chatId: { type: "number" },
+                    groupId: { type: "number" },
+                    senderId: { type: "string" },
+                    message: { type: "string" },
+                    createdAt: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const response = await axios.get(
+          process.env.DB_API_URL + `api/chat/allChats/${request.params.groupId}`
+        );
+        return response.data;
+      } catch (error) {
+        errorHandler(error, reply);
+      }
     }
-  });
+  );
 }
