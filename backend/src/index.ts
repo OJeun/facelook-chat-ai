@@ -70,6 +70,7 @@ server.register(swaggerUi, {
 server.register(require("@fastify/cors"), {
   origin: true, // allow all origins
 });
+
 // register plugins
 server.register(require("@fastify/formbody"));
 

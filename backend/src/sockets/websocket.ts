@@ -20,7 +20,10 @@ export function setupWebsocket(server: FastifyInstance) {
   }); //register websocket
 
   server.get("/ws", { websocket: true }, async (connection, req) => {
+    
     const { groupId } = req.query as { groupId: string };
+
+    console.log("WebSocket handshake successful for group:", groupId);
 
     if (!groupId) {
       connection.close();
