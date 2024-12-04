@@ -82,6 +82,7 @@ struct HomeView: View {
                     } else {
                         List(groups) { group in
                             Button(action: {
+                                print("Selected groupId: \(group.id)")
                                 selectedGroup = group
                             }) {
                                 Text(group.name)
