@@ -54,11 +54,9 @@ export function setupWebsocket(server: FastifyInstance) {
 
     connectedClients[groupId].add(socket);
 
-    // Server -> Client: Send recent messages to the newly connected client
     const recentMessages = await getRecentMessages(groupId);
     socket.send(JSON.stringify({ type: "recentMessages", messages: recentMessages }));
 
-    // Handle incoming messages from the client
     socket.on("message", async (messageBuffer) => {
       const message = JSON.parse(messageBuffer.toString());
       await saveMessage(message);

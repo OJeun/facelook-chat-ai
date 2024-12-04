@@ -1,5 +1,6 @@
 import { redisClient } from "./client";
 import { redisMessage, redisMessageWithTimeStamp } from "../models/chat";
+import { getMessagesFromDB } from "../services/databaseService";
 
 // Save a message to the group's message list
 export async function saveMessage(message: redisMessage) {
@@ -19,12 +20,23 @@ export async function getRecentMessages(
   groupId: string,
   limit: number = 20
 ): Promise<redisMessageWithTimeStamp[]> {
-  const messages = await redisClient.lRange(
+  const messagesFromRedis = await redisClient.lRange(
     `group:${groupId}:messages`,
     -limit,
     -1
   );
-  return messages.map((msg: any) => JSON.parse(msg));
+
+  if (messagesFromRedis.length > 0) {
+  return messagesFromRedis.map((msg: any) => JSON.parse(msg));
+  } else {
+    const messagesFromDb = await getMessagesFromDB(groupId, 0, limit);
+    if (messagesFromDb.length > 0) {
+      const redisMessages = messagesFromDb.map((msg) => JSON.stringify(msg));
+      await redisClient.rPush(`group:${groupId}:messages`, redisMessages);
+      return messagesFromDb;
+    }
+  }
+  return [];
 }
 
 export async function clearMessages(groupId: string) {

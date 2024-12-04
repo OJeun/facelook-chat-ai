@@ -32,7 +32,7 @@ export async function getMessagesFromDB(
   groupId: string,
   offset: number,
   limit: number
-): Promise<any[]> {
+): Promise<redisMessageWithTimeStamp[]> {
   console.log(`Retrieving messages for group ${groupId} from MySQL.`);
   const db_api_url =
     process.env.DB_API_URL +
@@ -51,5 +51,5 @@ export async function getMessagesFromDB(
     return [];
   }
 
-  return (await response.json()) as any[];
+  return (await response.json()) as redisMessageWithTimeStamp[];
 }
