@@ -5,7 +5,7 @@ import {
   EmojiGenerationResult,
   FullAnalysisResult,
 } from "../models/chat";
-import { chatOne, chatTwo, chatThree } from "../constants/testData";
+import { chatOne } from "../constants/testData";
 import "dotenv/config";
 
 const exampleResult: AnalysisResult = {
@@ -132,28 +132,22 @@ async function analyzeChatSentiment(chat: Chat): Promise<AnalysisResult> {
 }
 
 async function analyzeAllChats() {
-  const chats = [chatOne, chatTwo, chatThree];
+  const chats = [chatOne];
   const results: AnalysisResult[] = [];
 
   for (const chat of chats) {
-    let success = false;
-    while (!success) {
-      try {
-        const result = await analyzeChatSentiment(chat);
-        const emojiResult = await generateEmoji(chat);
-        const fullResult: FullAnalysisResult = {
-          ...result,
-          emojis: emojiResult,
-        };
-        console.log("fullResult: ", fullResult);
-        results.push(fullResult);
-        console.log(`analysis complete - chatId: ${chat.id}`);
-        success = true; // success flag
-      } catch (error) {
-        console.error(`Attempt failed for chatId: ${chat.id}`, error);
-        await new Promise((resolve) => setTimeout(resolve));
-        console.log(`Retrying analysis for chatId: ${chat.id}...`);
-      }
+    try {
+      const result = await analyzeChatSentiment(chat);
+      const emojiResult = await generateEmoji(chat);
+      const fullResult: FullAnalysisResult = {
+        ...result,
+        emojis: emojiResult,
+      };
+      console.log("fullResult: ", fullResult);
+      results.push(fullResult);
+      console.log(`analysis complete - chatId: ${chat.id}`);
+    } catch (error) {
+      console.error(`analysis failed - chatId: ${chat.id}`, error);
     }
   }
 
