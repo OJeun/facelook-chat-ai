@@ -21,6 +21,7 @@ export function setupWebsocket(server: FastifyInstance) {
   }); //register websocket
 
   server.get("/ws", { websocket: true }, async (connection, req) => {
+    console.log("req: ", req.body);
     const url = connection.url;
 
     if (!url) {
