@@ -8,7 +8,6 @@ import {
 } from "../redis/message";
 import { WebSocket } from "ws";
 import { dumpMessagesToDB } from "../redis/dumpService";
-import { parse } from "querystring";
 
 
 const connectedClients: Record<string, Set<WebSocket>> = {};
@@ -22,9 +21,11 @@ export function setupWebsocket(server: FastifyInstance) {
   }); //register websocket
 
   server.get("/ws", { websocket: true }, async (connection, req) => {
-    console.log("Connection", connection);
-    const groupId = parse(req.url.split("?")[1]).groupId as string;
-    
+    console.log("req.url", req.url);
+    console.log("req.url.split", req.url.split("?"));
+
+    const groupId = req.url.split("?")[1].split("=")[1];
+
     console.log("WebSocket handshake successful for group:", groupId);
 
     if (!groupId) {
