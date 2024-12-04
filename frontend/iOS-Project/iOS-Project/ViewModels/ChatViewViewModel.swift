@@ -26,7 +26,8 @@ class ChatViewViewModel: ObservableObject {
 
     func connectWebSocket() {
 
-        guard let url = URL(string: "wss://ios-project.onrender.com/ws?groupId=\(String(groupId))") else {
+        print("Query groupId: \(String(self.groupId))")
+        guard let url = URL(string: "wss://ios-project.onrender.com/ws?groupId=\(String(self.groupId))") else {
             print("Invalid WebSocket URL")
             return
         }
