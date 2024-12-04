@@ -55,7 +55,7 @@ export function setupWebsocket(server: FastifyInstance) {
     console.log("connection function: ", connection);
     
 
-    connection.send(
+    connection.socket.send(
       JSON.stringify({ type: "recentMessages", messages: recentMessages })
     );
 
