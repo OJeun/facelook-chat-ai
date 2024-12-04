@@ -34,20 +34,12 @@ struct ChatView: View {
         ScrollView {
             ScrollViewReader { proxy in
                 VStack(spacing: 12) {
-                    // Use explicit indices to help the compiler
-                    ForEach(Array(viewModel.messages.enumerated()), id: \.element.id) { index, message in
+                    ForEach(viewModel.messages) { message in
                         MessageRow(message: message, isCurrentUser: message.senderId == viewModel.currentUserId)
-                            .id(message.id) // Identify each row for `ScrollViewReader`
-                    }
-                }
-                .onAppear {
-                    // Scroll to the last message when the view appears
-                    if let lastMessage = viewModel.messages.last {
-                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                            .id(message.id)
                     }
                 }
                 .onChange(of: viewModel.messages) { _, newMessages in
-                    // Scroll to the last message when new messages are added
                     if let lastMessage = newMessages.last {
                         proxy.scrollTo(lastMessage.id, anchor: .bottom)
                     }
