@@ -8,6 +8,7 @@ import {
 } from "../redis/message";
 import { WebSocket } from "ws";
 import { dumpMessagesToDB } from "../redis/dumpService";
+import { parse } from "querystring";
 
 const connectedClients: Record<string, Set<WebSocket>> = {};
 const dumpTimers: Record<string, NodeJS.Timeout> = {};
@@ -20,9 +21,9 @@ export function setupWebsocket(server: FastifyInstance) {
   }); //register websocket
 
   server.get("/ws", { websocket: true }, async (connection, req) => {
-    
-    const { groupId } = req.query as { groupId: string };
-
+    console.log("Request URL: ", req.url);
+    const query = parse(req.url?.split("?")[1] || "");
+    const groupId = query.groupId as string;
     console.log("WebSocket handshake successful for group:", groupId);
 
     if (!groupId) {

@@ -73,6 +73,8 @@ server.register(require("@fastify/cors"), {
 
 // register plugins
 server.register(require("@fastify/formbody"));
+server.register(require("@fastify/querystring"));
+
 
 server.register(authRoutes, { prefix: "/api" });
 server.register(friendRoutes, { prefix: "/api" });
