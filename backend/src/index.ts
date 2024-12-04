@@ -13,6 +13,7 @@ import { JWTPayload } from "./models/server";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { setupWebsocket } from "./sockets/websocket";
+import { initializeRedis } from "./redis/client";
 
 //add websocket
 
@@ -130,6 +131,7 @@ server.addHook("preHandler", async (request) => {
 
 // Define the WebSocket route e.g.) "ws://localhost:3001/ws?groupId=12345"
 setupWebsocket(server);
+initializeRedis();
 
 const start = async () => {
   try {

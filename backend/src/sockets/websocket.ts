@@ -22,24 +22,21 @@ export function setupWebsocket(server: FastifyInstance) {
 
   server.get("/ws", { websocket: true }, async (connection, req) => {
     const url = connection.url;
-    console.log("url!!!", url);
-    console.log("req.url!!!", req.connection);
-    
+
     if (!url) {
       console.error("No URL found in connection");
       connection.close();
       return;
     }
 
-    const groupId = url.split("?")[1];
+    const querystring = url.split("?")[1];
+    const groupId = querystring?.split("=")[1];
+
     if (!groupId) {
       console.error("No group id found in URL");
       connection.close();
       return;
     }
-
-
-    console.log("WebSocket handshake successful for group:", groupId);
 
 
     if (!connectedClients[groupId]) {
