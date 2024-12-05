@@ -73,16 +73,48 @@ export function setupWebsocket(server: FastifyInstance) {
       }
     });
 
-    // Handle WebSocket closure
     socket.on("close", async () => {
+      // Remove the disconnected socket from the group
       connectedClients[groupId].delete(socket);
-
+    
+      // Check if no users are left in the group
       if (connectedClients[groupId].size === 0) {
+        console.log(`All users have left group ${groupId}. Cleaning up...`);
+    
+        // Clear the interval for dumping messages
         clearInterval(dumpTimers[groupId]);
         delete dumpTimers[groupId];
-        await dumpMessagesToDB(groupId);
-        await clearMessages(groupId);
+    
+        // Safely dump Redis messages to the database before clearing Redis
+        try {
+          console.log(`Dumping messages for group ${groupId} to the database...`);
+          await dumpMessagesToDB(groupId); // Save messages to the database
+          console.log(`Messages for group ${groupId} successfully saved.`);
+        } catch (error) {
+          console.error(
+            `Failed to dump messages for group ${groupId} to the database:`,
+            error
+          );
+          // Optionally, you might want to retry or log for monitoring
+        }
+    
+        // Clear Redis only after confirming dump is successful
+        try {
+          console.log(`Clearing messages for group ${groupId} from Redis...`);
+          await clearMessages(groupId); // Remove messages from Redis
+          console.log(`Messages for group ${groupId} successfully cleared.`);
+        } catch (error) {
+          console.error(
+            `Failed to clear messages for group ${groupId} from Redis:`,
+            error
+          );
+        }
+      } else {
+        console.log(
+          `User disconnected from group ${groupId}. Remaining users: ${connectedClients[groupId].size}`
+        );
       }
     });
+    
   });
 }
