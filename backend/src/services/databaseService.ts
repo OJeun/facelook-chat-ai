@@ -37,20 +37,39 @@ export async function getMessagesFromDB(
 ): Promise<redisMessageWithTimeStamp[]> {
   console.log(`Retrieving messages for group ${groupId} from MySQL.`);
   const db_api_url =
-  `${process.env.DB_API_URL}api/chat/20Chats/${groupId}` +
-  `?offset=${offset}&limit=${limit}`;
+    `${process.env.DB_API_URL}api/chat/20Chats/${groupId}` +
+    `?offset=${offset}&limit=${limit}`;
 
-  const response = await fetch(db_api_url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  console.log("This is the db_api_url: ", db_api_url);
 
-  if (!response.ok) {
-    console.error("Failed to retrieve messages from MySQL.");
+  try {
+    const response = await fetch(db_api_url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to retrieve messages from MySQL.");
+      return [];
+    }
+
+    const jsonResponse = await response.json();
+    console.log("Response from MySQL API:", jsonResponse);
+
+    if (jsonResponse && Array.isArray(jsonResponse.chats)) {
+      return jsonResponse.chats.map((chat: redisMessageWithTimeStamp) => ({
+        ...chat,
+        content: chat.message, 
+        message: undefined,
+      }));
+    } else {
+      console.error("Unexpected API response structure. Returning empty array.");
+      return [];
+    }
+  } catch (error) {
+    console.error("Error while fetching messages from MySQL:", error);
     return [];
   }
-
-  return (await response.json()) as redisMessageWithTimeStamp[];
 }

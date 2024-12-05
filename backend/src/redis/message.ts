@@ -59,6 +59,7 @@ export async function getRecentMessages(
     return [];
   }
 
+
   const allMessages = [
     ...messagesFromRedis.map((msg: any) => JSON.parse(msg)),
     ...messagesFromDb.map((msg: any) => ({
