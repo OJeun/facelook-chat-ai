@@ -14,7 +14,7 @@ export async function friendRequestRoutes(fastify: FastifyInstance) {
         params: {
           type: 'object',
           properties: {
-            receiverId: { type: 'string' },
+            receiverId: { type: ['string', 'number'] },
           },
           required: ['receiverId'],
         },
