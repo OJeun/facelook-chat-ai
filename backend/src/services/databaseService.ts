@@ -12,7 +12,7 @@ export async function saveMessagesToDB(
   );
   const db_api_url = process.env.DB_API_URL + "api/chat/saveChats";
   
-  console.log("5. This is the messages that are being saved: ", messages[0].message);
+  console.log("5. This is the messages that are being saved: ", messages);
 
   const response = await fetch(db_api_url, {
     method: "POST",
