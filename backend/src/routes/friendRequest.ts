@@ -3,6 +3,7 @@ import axios from 'axios';
 import { errorHandler } from '../services/dbErrorHandler';
 
 export async function friendRequestRoutes(fastify: FastifyInstance) {
+  // Get All Friend Requests by Receiver ID
   fastify.get<{ Params: { receiverId: string } }>(
     '/friend/request/:receiverId',
     {
@@ -15,6 +16,7 @@ export async function friendRequestRoutes(fastify: FastifyInstance) {
           properties: {
             receiverId: { type: 'string' },
           },
+          required: ['receiverId'],
         },
         response: {
           200: {
@@ -35,9 +37,9 @@ export async function friendRequestRoutes(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       try {
+        const { receiverId } = request.params;
         const response = await axios.get(
-          process.env.DB_API_URL +
-            `api/friend/request/${request.params.receiverId}`
+          `${process.env.DB_API_URL}/api/friend/request/${receiverId}`
         );
         return response.data;
       } catch (error) {
@@ -46,6 +48,7 @@ export async function friendRequestRoutes(fastify: FastifyInstance) {
     }
   );
 
+  // Send Friend Request
   fastify.post<{ Body: { senderId: number; receiverEmail: string } }>(
     '/friend/request/send',
     {
@@ -75,7 +78,7 @@ export async function friendRequestRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const response = await axios.post(
-          process.env.DB_API_URL + 'api/friend/request/send',
+          `${process.env.DB_API_URL}/api/friend/request/send`,
           request.body
         );
         return response.data;
@@ -85,6 +88,7 @@ export async function friendRequestRoutes(fastify: FastifyInstance) {
     }
   );
 
+  // Accept Friend Request
   fastify.post<{ Body: { requestId: number } }>(
     '/friend/request/accept',
     {
@@ -112,7 +116,7 @@ export async function friendRequestRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const response = await axios.post(
-          process.env.DB_API_URL + 'api/friend/request/accept',
+          `${process.env.DB_API_URL}/api/friend/request/accept`,
           request.body
         );
         return response.data;
@@ -122,6 +126,7 @@ export async function friendRequestRoutes(fastify: FastifyInstance) {
     }
   );
 
+  // Reject Friend Request
   fastify.post<{ Body: { requestId: number } }>(
     '/friend/request/reject',
     {
@@ -149,7 +154,7 @@ export async function friendRequestRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const response = await axios.post(
-          process.env.DB_API_URL + 'api/friend/request/reject',
+          `${process.env.DB_API_URL}/api/friend/request/reject`,
           request.body
         );
         return response.data;
