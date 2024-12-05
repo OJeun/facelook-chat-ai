@@ -76,7 +76,7 @@ class ChatViewViewModel: ObservableObject {
         guard !newMessage.isEmpty else { return }
 
         let message = Message(
-            id: UUID(),
+            id: UUID().uuidString,
             content: newMessage,
             senderId: currentUserId,
             senderName: currentUserName,
