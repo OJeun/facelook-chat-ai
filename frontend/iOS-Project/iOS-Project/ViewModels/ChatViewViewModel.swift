@@ -25,7 +25,11 @@ class ChatViewViewModel: ObservableObject {
 
 
     func connectWebSocket() {
-
+        guard webSocketTask == nil else {
+            print("WebSocket already connected")
+            return
+        }
+        
         print("Query groupId: \(String(self.groupId))")
         guard let url = URL(string: "wss://ios-project.onrender.com/ws?groupId=\(String(self.groupId))") else {
             print("Invalid WebSocket URL")
@@ -36,6 +40,7 @@ class ChatViewViewModel: ObservableObject {
 
         receiveMessage()
     }
+
 
 
     func receiveMessage() {
