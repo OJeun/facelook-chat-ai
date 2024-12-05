@@ -11,8 +11,8 @@ export async function saveMessagesToDB(
     `Saving ${messages.length} messages for group ${groupId} to MySQL.`
   );
   const db_api_url = process.env.DB_API_URL + "api/chat/saveChats";
-
-  console.log(messages);
+  
+  console.log("This is the messages that are being saved: ", messages[0].message);
 
   const response = await fetch(db_api_url, {
     method: "POST",
@@ -37,9 +37,8 @@ export async function getMessagesFromDB(
 ): Promise<redisMessageWithTimeStamp[]> {
   console.log(`Retrieving messages for group ${groupId} from MySQL.`);
   const db_api_url =
-    process.env.DB_API_URL +
-    "api/chat/getChats" +
-    `?groupId=${groupId}&offset=${offset}&limit=${limit}`;
+  `${process.env.DB_API_URL}api/chat/20Chats/${groupId}` +
+  `?offset=${offset}&limit=${limit}`;
 
   const response = await fetch(db_api_url, {
     method: "GET",
