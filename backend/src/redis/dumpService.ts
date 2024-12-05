@@ -1,4 +1,4 @@
-import { getRecentMessages, clearMessages, getRecentMessagesFromRedis } from "./message";
+import { clearMessages, getRecentMessagesFromRedis } from "./message";
 import { saveMessagesToDB } from "../services/databaseService";
 import { Mutex } from "async-mutex";
 
