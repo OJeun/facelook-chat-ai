@@ -8,7 +8,6 @@ import {
 import { dumpMessagesToDB } from "../redis/dumpService";
 
 const connectedClients: Record<string, Set<WebSocket>> = {};
-// const dumpTimers: Record<string, NodeJS.Timeout> = {};
 
 export function setupWebsocket(server: FastifyInstance) {
   // Create a WebSocket server and attach it to the Fastify server
@@ -91,9 +90,6 @@ export function setupWebsocket(server: FastifyInstance) {
     
       if (connectedClients[groupId].size === 0) {
         console.log(`All users have left group ${groupId}. Cleaning up...`);
-    
-        // clearInterval(dumpTimers[groupId]);
-        // delete dumpTimers[groupId];
     
         try {
           console.log(`1.Dumping messages for group ${groupId} to the database...`);

@@ -66,6 +66,8 @@ export async function getRecentMessages(
       ...msg,
       content: msg.message, 
       message: undefined,
+      id: msg.chatId,
+      chatId: undefined,
     })),
   ];
 
