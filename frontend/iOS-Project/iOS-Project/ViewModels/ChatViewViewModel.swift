@@ -24,8 +24,8 @@ class ChatViewViewModel: ObservableObject {
     }
 
 
-    func connectWebSocket() {
-
+func connectWebSocket() {
+    if webSocketTask == nil {
         print("Query groupId: \(String(self.groupId))")
         guard let url = URL(string: "wss://ios-project.onrender.com/ws?groupId=\(String(self.groupId))") else {
             print("Invalid WebSocket URL")
@@ -33,9 +33,20 @@ class ChatViewViewModel: ObservableObject {
         }
         webSocketTask = URLSession.shared.webSocketTask(with: url)
         webSocketTask?.resume()
-
         receiveMessage()
     }
+}
+
+func disconnectWebSocket() {
+    webSocketTask?.cancel(with: .goingAway, reason: nil)
+    webSocketTask = nil
+}
+
+func reconnectWebSocket() {
+    disconnectWebSocket()
+    connectWebSocket()
+}
+
 
     func receiveMessage() {
         webSocketTask?.receive { [weak self] result in
