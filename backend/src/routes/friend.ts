@@ -173,7 +173,7 @@ export async function friendRoutes(fastify: FastifyInstance) {
   );
 
   fastify.get(
-    "user/achievementPoint",
+    "/user/achievementPoint",
     {
       schema: {
         tags: ["friend"],
@@ -184,12 +184,15 @@ export async function friendRoutes(fastify: FastifyInstance) {
             type: "object",
             properties: {
               users: {
-                type: "object",
-                properties: {
-                  userId: { type: "number" },
-                  name: { type: "string" },
-                  email: { type: "string" },
-                  achievementPoint: { type: "number" },
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    userId: { type: "number" },
+                    name: { type: "string" },
+                    email: { type: "string" },
+                    achievementPoint: { type: "number" },
+                  },
                 },
               },
             },
