@@ -1,5 +1,6 @@
 // Define the structure for individual messages
 interface redisMessage {
+  chatId: string;
   groupId: string;
   senderId: string;
   senderName: string;
@@ -9,6 +10,8 @@ interface redisMessage {
 interface redisMessageWithTimeStamp extends redisMessage {
   createdAt: string;
 }
+
+
 interface Message {
   message: string;
   userId: string;

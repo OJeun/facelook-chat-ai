@@ -63,6 +63,8 @@ export async function getMessagesFromDB(
         ...chat,
         content: chat.message, 
         message: undefined,
+        id: chat.chatId,
+        chatId: undefined,
       }));
     } else {
       console.error("Unexpected API response structure. Returning empty array.");

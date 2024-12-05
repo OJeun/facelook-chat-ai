@@ -62,13 +62,7 @@ export async function getRecentMessages(
 
   const allMessages = [
     ...messagesFromRedis.map((msg: any) => JSON.parse(msg)),
-    ...messagesFromDb.map((msg: any) => ({
-      ...msg,
-      content: msg.message, 
-      message: undefined,
-      id: msg.chatId,
-      chatId: undefined,
-    })),
+    ...messagesFromDb
   ];
 
   console.log(
