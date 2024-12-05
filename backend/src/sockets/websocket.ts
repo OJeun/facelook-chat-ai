@@ -89,28 +89,24 @@ export function setupWebsocket(server: FastifyInstance) {
       connectedClients[groupId].delete(socket);
       console.log(`Remaining clients for group ${groupId}:`, connectedClients[groupId].size);
     
-      // Check if no users are left in the group
       if (connectedClients[groupId].size === 0) {
         console.log(`All users have left group ${groupId}. Cleaning up...`);
     
-        // Clear the interval for dumping messages
         clearInterval(dumpTimers[groupId]);
         delete dumpTimers[groupId];
     
-        // Safely dump Redis messages to the database before clearing Redis
         try {
-          console.log(`Dumping messages for group ${groupId} to the database...`);
-          await dumpMessagesToDB(groupId); // Save messages to the database
-          console.log(`Messages for group ${groupId} successfully saved.`);
+          console.log(`1.Dumping messages for group ${groupId} to the database...`);
+          await dumpMessagesToDB(groupId); 
+          console.log(`8. Messages for group ${groupId} successfully saved.`);
         } catch (error) {
           console.error(
-            `Failed to dump messages for group ${groupId} to the database:`,
+            `2. Failed to dump messages for group ${groupId} to the database:`,
             error
           );
-          // Optionally, you might want to retry or log for monitoring
+          
         }
     
-        // Clear Redis only after confirming dump is successful
         try {
           console.log(`Clearing messages for group ${groupId} from Redis...`);
           await clearMessages(groupId); // Remove messages from Redis

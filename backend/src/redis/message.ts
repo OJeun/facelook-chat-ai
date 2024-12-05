@@ -13,6 +13,8 @@ export async function saveMessage(message: redisMessage) {
     `group:${message.groupId}:messages`,
     JSON.stringify(messageData)
   );
+
+  await redisClient.expire(`group:${message.groupId}:messages`, 60 * 10);
 }
 
 // Retrieve the most recent 20 messages from a group
@@ -48,7 +50,8 @@ export async function getRecentMessagesFromRedis(groupId: string) {
   );
 
   if (messagesFromRedis.length > 0) {
-    console.log(`Retrieved ${messagesFromRedis.length} messages from Redis`);
+    console.log(`!!!!!Retrieved ${messagesFromRedis.length} messages from Redis`);
+    console.log(`!!!!!This is the message: ${messagesFromRedis[0]}`);
     return messagesFromRedis.map((msg: any) => JSON.parse(msg));
   }
   return [];

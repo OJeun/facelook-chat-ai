@@ -8,11 +8,11 @@ export async function saveMessagesToDB(
   messages: redisMessageWithTimeStamp[]
 ) {
   console.log(
-    `Saving ${messages.length} messages for group ${groupId} to MySQL.`
+    `4. Saving ${messages.length} messages for group ${groupId} to MySQL.`
   );
   const db_api_url = process.env.DB_API_URL + "api/chat/saveChats";
   
-  console.log("This is the messages that are being saved: ", messages[0].message);
+  console.log("5. This is the messages that are being saved: ", messages[0].message);
 
   const response = await fetch(db_api_url, {
     method: "POST",
@@ -25,7 +25,7 @@ export async function saveMessagesToDB(
   });
 
   if (!response.ok) {
-    console.error("Failed to save messages to MySQL.");
+    console.error("6. Failed to save messages to MySQL.");
     return;
   }
 }
