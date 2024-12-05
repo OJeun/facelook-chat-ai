@@ -14,6 +14,7 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { setupWebsocket } from "./sockets/websocket";
 import { initializeRedis } from "./redis/client";
+import { friendRequestRoutes } from "./routes/friendRequest";
 
 //add websocket
 
@@ -81,6 +82,7 @@ server.register(friendRoutes, { prefix: "/api" });
 server.register(groupRoutes, { prefix: "/api" });
 server.register(invitationRoutes, { prefix: "/api" });
 server.register(chatRoutes, { prefix: "/api" });
+server.register(friendRequestRoutes, { prefix: '/api' });
 
 const verifyToken = async (request: FastifyRequest) => {
   try {
