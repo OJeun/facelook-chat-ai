@@ -40,6 +40,23 @@ export async function getRecentMessages(
   return [];
 }
 
+export async function getRecentMessagesFromRedis(
+  groupId: string,
+): Promise<redisMessageWithTimeStamp[]> {
+  const messagesFromRedis = await redisClient.lRange(
+    `group:${groupId}:messages`,
+    0,
+    -1
+  );
+
+  if (messagesFromRedis.length > 0) {
+    console.log(`Retrieved ${messagesFromRedis.length} messages from Redis`);
+    return messagesFromRedis.map((msg: any) => JSON.parse(msg));
+  }
+
+  return [];
+}
+
 export async function clearMessages(groupId: string) {
   await redisClient.del(`group:${groupId}:messages`);
 }

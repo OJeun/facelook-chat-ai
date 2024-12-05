@@ -58,23 +58,25 @@ export function setupWebsocket(server: FastifyInstance) {
           connectedClients[groupId].delete(socket);
         }
       }
-    }, 10000); 
-    
+    }, 10000);
 
     connectedClients[groupId].add(socket);
-    console.log(`Connected clients for group ${groupId}:`, connectedClients[groupId].size);
-
+    console.log(
+      `Connected clients for group ${groupId}:`,
+      connectedClients[groupId].size
+    );
 
     const recentMessages = await getRecentMessages(groupId);
     console.log(`Sending ${recentMessages} recent messages to client`);
-    socket.send(JSON.stringify({ type: "recentMessages", messages: recentMessages }));
+    socket.send(
+      JSON.stringify({ type: "recentMessages", messages: recentMessages })
+    );
 
     socket.on("message", async (messageBuffer) => {
       const message = JSON.parse(messageBuffer.toString());
       console.log(`Received message: ${message}`);
 
       await saveMessage(message);
-    
 
       // Broadcast message to all connected clients in the same group
       for (const client of connectedClients[groupId]) {
@@ -85,21 +87,25 @@ export function setupWebsocket(server: FastifyInstance) {
     });
 
     socket.on("close", async () => {
-      console.log(`Socket is closing for group ${groupId}:`, connectedClients[groupId].size);
+      console.log(
+        `Socket is closing for group ${groupId}:`,
+        connectedClients[groupId].size
+      );
       connectedClients[groupId].delete(socket);
-      console.log(`Remaining clients for group ${groupId}:`, connectedClients[groupId].size);
-    
+      console.log(
+        `Remaining clients for group ${groupId}:`,
+        connectedClients[groupId].size
+      );
+
       // Check if no users are left in the group
       if (connectedClients[groupId].size === 0) {
         console.log(`All users have left group ${groupId}. Cleaning up...`);
-    
-        // Clear the interval for dumping messages
-        clearInterval(dumpTimers[groupId]);
-        delete dumpTimers[groupId];
-    
+
         // Safely dump Redis messages to the database before clearing Redis
         try {
-          console.log(`Dumping messages for group ${groupId} to the database...`);
+          console.log(
+            `Dumping messages for group ${groupId} to the database...`
+          );
           await dumpMessagesToDB(groupId); // Save messages to the database
           console.log(`Messages for group ${groupId} successfully saved.`);
         } catch (error) {
@@ -107,9 +113,12 @@ export function setupWebsocket(server: FastifyInstance) {
             `Failed to dump messages for group ${groupId} to the database:`,
             error
           );
-          // Optionally, you might want to retry or log for monitoring
         }
-    
+
+        // Clear the interval for dumping messages
+        clearInterval(dumpTimers[groupId]);
+        delete dumpTimers[groupId];
+
         // Clear Redis only after confirming dump is successful
         try {
           console.log(`Clearing messages for group ${groupId} from Redis...`);
@@ -127,6 +136,5 @@ export function setupWebsocket(server: FastifyInstance) {
         );
       }
     });
-    
   });
 }

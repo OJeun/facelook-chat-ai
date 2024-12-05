@@ -1,4 +1,4 @@
-import { getRecentMessages, clearMessages } from "./message";
+import { getRecentMessages, clearMessages, getRecentMessagesFromRedis } from "./message";
 import { saveMessagesToDB } from "../services/databaseService";
 import { Mutex } from "async-mutex";
 
@@ -12,7 +12,8 @@ export async function dumpMessagesToDB(groupId: string) {
   
     const mutex = groupLocks[groupId];
     await mutex.runExclusive(async () => {
-      const messages = await getRecentMessages(groupId);
+      const messages = await getRecentMessagesFromRedis(groupId);
+      console.log(`THis is the messages that are being dumped in dumpMessagesToDB: ${messages[0].message}`);
       if (messages.length === 0) return;
   
       await saveMessagesToDB(groupId, messages);
