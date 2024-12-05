@@ -8,87 +8,125 @@ import {
 import { dumpMessagesToDB } from "../redis/dumpService";
 
 const connectedClients: Record<string, Set<WebSocket>> = {};
-const clientConnections: Record<string, WebSocket> = {}; // 클라이언트별 연결 관리
 const dumpTimers: Record<string, NodeJS.Timeout> = {};
 
 export function setupWebsocket(server: FastifyInstance) {
-  console.log(server)
+  // Create a WebSocket server and attach it to the Fastify server
   const wss = new WebSocketServer({ noServer: true });
 
-  wss.on("connection", async (socket, request) => {
-  const url = request.url;
-
-  if (!url) {
-    console.error("No URL found in request");
-    socket.close();
-    return;
-  }
-
-  const querystring = url.split("?")[1];
-  const groupId = querystring?.split("=")[1];
-
-  if (!groupId) {
-    console.error("No group ID found in URL");
-    socket.close();
-    return;
-  }
-
-  const clientKey = `${groupId}-${request.socket.remoteAddress}-${request.socket.remotePort}`;
-  console.log(`Client key: ${clientKey}`);
-
-  if (clientConnections[clientKey]) {
-    console.log(`Closing existing connection for client: ${clientKey}`);
-    clientConnections[clientKey].close();
-  }
-  clientConnections[clientKey] = socket;
-
-  if (!connectedClients[groupId]) {
-    connectedClients[groupId] = new Set();
-
-    dumpTimers[groupId] = setInterval(() => {
-      dumpMessagesToDB(groupId);
-    }, 10 * 60 * 1000);
-  }
-
-  connectedClients[groupId].add(socket);
-  console.log(`Connected clients for group ${groupId}:`, connectedClients[groupId].size);
-
-  const recentMessages = await getRecentMessages(groupId);
-  socket.send(JSON.stringify({ type: "recentMessages", messages: recentMessages }));
-
-  socket.on("message", async (messageBuffer) => {
-    const message = JSON.parse(messageBuffer.toString());
-    console.log(`Received message: ${message}`);
-
-    await saveMessage(message);
-
-    for (const client of connectedClients[groupId]) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({ type: "newMessage", message }));
-      }
-    }
-  });
-
-  socket.on("close", async () => {
-    console.log(`Socket is closing for group ${groupId}:`, connectedClients[groupId].size);
-    connectedClients[groupId].delete(socket);
-    delete clientConnections[clientKey];
-
-    if (connectedClients[groupId].size === 0) {
-      console.log(`All users have left group ${groupId}. Cleaning up...`);
-      clearInterval(dumpTimers[groupId]);
-      delete dumpTimers[groupId];
-
-      try {
-        await dumpMessagesToDB(groupId);
-        await clearMessages(groupId);
-      } catch (error) {
-        console.error(`Error during cleanup for group ${groupId}:`, error);
-      }
+  // Handle WebSocket upgrade requests
+  server.server.on("upgrade", (request, socket, head) => {
+    if (request.url?.startsWith("/ws")) {
+      wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit("connection", ws, request);
+      });
     } else {
-      console.log(`User disconnected from group ${groupId}. Remaining users: ${connectedClients[groupId].size}`);
+      socket.destroy();
     }
   });
-});
 
+  // Handle WebSocket connections
+  wss.on("connection", async (socket, request) => {
+    const url = request.url;
+
+    if (!url) {
+      console.error("No URL found in request");
+      socket.close();
+      return;
+    }
+
+    const querystring = url.split("?")[1];
+    const groupId = querystring?.split("=")[1];
+
+    if (!groupId) {
+      console.error("No group ID found in URL");
+      socket.close();
+      return;
+    }
+
+    if (!connectedClients[groupId]) {
+      connectedClients[groupId] = new Set();
+
+      dumpTimers[groupId] = setInterval(() => {
+        dumpMessagesToDB(groupId);
+      }, 10 * 60 * 1000);
+    }
+
+    setInterval(() => {
+      for (const socket of connectedClients[groupId]) {
+        if (socket.readyState !== WebSocket.OPEN) {
+          connectedClients[groupId].delete(socket);
+        }
+      }
+    }, 10000); 
+    
+
+    connectedClients[groupId].add(socket);
+    console.log(`Connected clients for group ${groupId}:`, connectedClients[groupId].size);
+
+
+    const recentMessages = await getRecentMessages(groupId);
+    console.log(`Sending ${recentMessages} recent messages to client`);
+    socket.send(JSON.stringify({ type: "recentMessages", messages: recentMessages }));
+
+    socket.on("message", async (messageBuffer) => {
+      const message = JSON.parse(messageBuffer.toString());
+      console.log(`Received message: ${message}`);
+
+      await saveMessage(message);
+    
+
+      // Broadcast message to all connected clients in the same group
+      for (const client of connectedClients[groupId]) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({ type: "newMessage", message }));
+        }
+      }
+    });
+
+    socket.on("close", async () => {
+      console.log(`Socket is closing for group ${groupId}:`, connectedClients[groupId].size);
+      connectedClients[groupId].delete(socket);
+      console.log(`Remaining clients for group ${groupId}:`, connectedClients[groupId].size);
+    
+      // Check if no users are left in the group
+      if (connectedClients[groupId].size === 0) {
+        console.log(`All users have left group ${groupId}. Cleaning up...`);
+    
+        // Clear the interval for dumping messages
+        clearInterval(dumpTimers[groupId]);
+        delete dumpTimers[groupId];
+    
+        // Safely dump Redis messages to the database before clearing Redis
+        try {
+          console.log(`Dumping messages for group ${groupId} to the database...`);
+          await dumpMessagesToDB(groupId); // Save messages to the database
+          console.log(`Messages for group ${groupId} successfully saved.`);
+        } catch (error) {
+          console.error(
+            `Failed to dump messages for group ${groupId} to the database:`,
+            error
+          );
+          // Optionally, you might want to retry or log for monitoring
+        }
+    
+        // Clear Redis only after confirming dump is successful
+        try {
+          console.log(`Clearing messages for group ${groupId} from Redis...`);
+          await clearMessages(groupId); // Remove messages from Redis
+          console.log(`Messages for group ${groupId} successfully cleared.`);
+        } catch (error) {
+          console.error(
+            `Failed to clear messages for group ${groupId} from Redis:`,
+            error
+          );
+        }
+      } else {
+        console.log(
+          `User disconnected from group ${groupId}. Remaining users: ${connectedClients[groupId].size}`
+        );
+      }
+    });
+    
+  });
 }
