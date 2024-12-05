@@ -25,11 +25,7 @@ class ChatViewViewModel: ObservableObject {
 
 
     func connectWebSocket() {
-        guard webSocketTask == nil else {
-            print("WebSocket already connected")
-            return
-        }
-        
+
         print("Query groupId: \(String(self.groupId))")
         guard let url = URL(string: "wss://ios-project.onrender.com/ws?groupId=\(String(self.groupId))") else {
             print("Invalid WebSocket URL")
@@ -40,8 +36,6 @@ class ChatViewViewModel: ObservableObject {
 
         receiveMessage()
     }
-
-
 
     func receiveMessage() {
         webSocketTask?.receive { [weak self] result in
@@ -54,11 +48,9 @@ class ChatViewViewModel: ObservableObject {
                 switch message {
                 case .string(let text):
                     if let data = text.data(using: .utf8),
-                    let response = try? JSONDecoder().decode(WebSocketResponse.self, from: data) {
-                        if response.type == "recentMessages", let messages = response.messages {
-                            DispatchQueue.main.async {
-                                self.messages.append(contentsOf: messages)
-                            }
+                       let receivedMessage = try? JSONDecoder().decode(Message.self, from: data) {
+                        DispatchQueue.main.async {
+                            self.messages.append(receivedMessage)
                         }
                     } else {
                         print("Failed to decode message: \(text)")

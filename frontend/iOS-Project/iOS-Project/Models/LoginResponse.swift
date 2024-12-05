@@ -19,3 +19,7 @@ struct User: Codable {
     let name: String
     let achievementPoint: Int
 }
+
+struct UserResponse: Codable {
+    let user: User
+}
