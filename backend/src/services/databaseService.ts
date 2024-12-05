@@ -60,11 +60,12 @@ export async function getMessagesFromDB(
 
     if (jsonResponse && Array.isArray(jsonResponse.chats)) {
       return jsonResponse.chats.map((chat: redisMessageWithTimeStamp) => ({
-        ...chat,
-        content: chat.message, 
-        message: undefined,
-        id: chat.chatId,
-        chatId: undefined,
+        id: String(chat.chatId),          
+        groupId: String(chat.groupId),    // Convert `groupId` to string
+        senderId: chat.senderId,
+        senderName: chat.senderName,
+        content: chat.message,            // Map `message` to `content`
+        createdAt: chat.createdAt,
       }));
     } else {
       console.error("Unexpected API response structure. Returning empty array.");
