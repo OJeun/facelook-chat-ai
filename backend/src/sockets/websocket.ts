@@ -8,13 +8,12 @@ import {
 import { dumpMessagesToDB } from "../redis/dumpService";
 
 const connectedClients: Record<string, Set<WebSocket>> = {};
+const clientConnections: Record<string, WebSocket> = {}; // 클라이언트별 연결 관리
 const dumpTimers: Record<string, NodeJS.Timeout> = {};
 
 export function setupWebsocket(server: FastifyInstance) {
-  // Create a WebSocket server and attach it to the Fastify server
   const wss = new WebSocketServer({ noServer: true });
 
-  // Handle WebSocket upgrade requests
   server.server.on("upgrade", (request, socket, head) => {
     if (request.url?.startsWith("/ws")) {
       wss.handleUpgrade(request, socket, head, (ws) => {
@@ -25,7 +24,6 @@ export function setupWebsocket(server: FastifyInstance) {
     }
   });
 
-  // Handle WebSocket connections
   wss.on("connection", async (socket, request) => {
     const url = request.url;
 
@@ -44,6 +42,16 @@ export function setupWebsocket(server: FastifyInstance) {
       return;
     }
 
+    // 중복 연결 방지: 클라이언트가 이미 연결된 경우 기존 연결 사용
+    const clientKey = `${groupId}-${request.socket.remoteAddress}`;
+    if (clientConnections[clientKey]) {
+      console.log(`Client already connected to group ${groupId}`);
+      socket.close();
+      return;
+    }
+
+    clientConnections[clientKey] = socket;
+
     if (!connectedClients[groupId]) {
       connectedClients[groupId] = new Set();
 
@@ -54,8 +62,9 @@ export function setupWebsocket(server: FastifyInstance) {
 
     connectedClients[groupId].add(socket);
 
+    console.log(`Connected clients for group ${groupId}:`, connectedClients[groupId].size);
+
     const recentMessages = await getRecentMessages(groupId);
-    console.log(`Sending ${recentMessages} recent messages to client`);
     socket.send(JSON.stringify({ type: "recentMessages", messages: recentMessages }));
 
     socket.on("message", async (messageBuffer) => {
@@ -63,9 +72,7 @@ export function setupWebsocket(server: FastifyInstance) {
       console.log(`Received message: ${message}`);
 
       await saveMessage(message);
-    
 
-      // Broadcast message to all connected clients in the same group
       for (const client of connectedClients[groupId]) {
         if (client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify({ type: "newMessage", message }));
@@ -74,40 +81,19 @@ export function setupWebsocket(server: FastifyInstance) {
     });
 
     socket.on("close", async () => {
-      // Remove the disconnected socket from the group
       connectedClients[groupId].delete(socket);
-    
-      // Check if no users are left in the group
+      delete clientConnections[clientKey]; // 연결 제거
+
       if (connectedClients[groupId].size === 0) {
         console.log(`All users have left group ${groupId}. Cleaning up...`);
-    
-        // Clear the interval for dumping messages
         clearInterval(dumpTimers[groupId]);
         delete dumpTimers[groupId];
-    
-        // Safely dump Redis messages to the database before clearing Redis
+
         try {
-          console.log(`Dumping messages for group ${groupId} to the database...`);
-          await dumpMessagesToDB(groupId); // Save messages to the database
-          console.log(`Messages for group ${groupId} successfully saved.`);
+          await dumpMessagesToDB(groupId);
+          await clearMessages(groupId);
         } catch (error) {
-          console.error(
-            `Failed to dump messages for group ${groupId} to the database:`,
-            error
-          );
-          // Optionally, you might want to retry or log for monitoring
-        }
-    
-        // Clear Redis only after confirming dump is successful
-        try {
-          console.log(`Clearing messages for group ${groupId} from Redis...`);
-          await clearMessages(groupId); // Remove messages from Redis
-          console.log(`Messages for group ${groupId} successfully cleared.`);
-        } catch (error) {
-          console.error(
-            `Failed to clear messages for group ${groupId} from Redis:`,
-            error
-          );
+          console.error(`Error during cleanup for group ${groupId}:`, error);
         }
       } else {
         console.log(
@@ -115,6 +101,5 @@ export function setupWebsocket(server: FastifyInstance) {
         );
       }
     });
-    
   });
 }
