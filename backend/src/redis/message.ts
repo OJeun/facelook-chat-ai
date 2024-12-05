@@ -47,6 +47,18 @@ export async function getRecentMessages(
     numberOfMessagesFromDb
   );
 
+  const lengthOfMessagesFromDb = messagesFromDb.length;
+
+  if (lengthOfMessagesFromDb === 0) {
+    console.log(`No messages found in DB for group ${groupId}`);
+    return messagesFromRedis.map((msg: any) => JSON.parse(msg));
+  }
+
+  if (lengthOfMessagesFromDb === 0 && numberOfMessagesFromRedis === 0) {
+    console.log(`No messages found in Redis or DB for group ${groupId}`);
+    return [];
+  }
+
   const allMessages = [
     ...messagesFromRedis.map((msg: any) => JSON.parse(msg)),
     ...messagesFromDb.map((msg: any) => ({
