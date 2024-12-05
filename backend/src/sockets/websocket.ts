@@ -8,7 +8,7 @@ import {
 import { dumpMessagesToDB } from "../redis/dumpService";
 
 const connectedClients: Record<string, Set<WebSocket>> = {};
-const dumpTimers: Record<string, NodeJS.Timeout> = {};
+// const dumpTimers: Record<string, NodeJS.Timeout> = {};
 
 export function setupWebsocket(server: FastifyInstance) {
   // Create a WebSocket server and attach it to the Fastify server
@@ -47,9 +47,9 @@ export function setupWebsocket(server: FastifyInstance) {
     if (!connectedClients[groupId]) {
       connectedClients[groupId] = new Set();
 
-      dumpTimers[groupId] = setInterval(() => {
-        dumpMessagesToDB(groupId);
-      }, 10 * 60 * 1000);
+      // dumpTimers[groupId] = setInterval(() => {
+      //   dumpMessagesToDB(groupId);
+      // }, 10 * 60 * 1000);
     }
 
     setInterval(() => {
@@ -92,13 +92,13 @@ export function setupWebsocket(server: FastifyInstance) {
       if (connectedClients[groupId].size === 0) {
         console.log(`All users have left group ${groupId}. Cleaning up...`);
     
-        clearInterval(dumpTimers[groupId]);
-        delete dumpTimers[groupId];
+        // clearInterval(dumpTimers[groupId]);
+        // delete dumpTimers[groupId];
     
         try {
           console.log(`1.Dumping messages for group ${groupId} to the database...`);
           await dumpMessagesToDB(groupId); 
-          console.log(`8. Messages for group ${groupId} successfully saved.`);
+          console.log(`. Messages for group ${groupId} successfully saved.`);
         } catch (error) {
           console.error(
             `2. Failed to dump messages for group ${groupId} to the database:`,
