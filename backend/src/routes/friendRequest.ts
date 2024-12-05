@@ -7,7 +7,7 @@ export async function friendRequestRoutes(fastify: FastifyInstance) {
     '/friend/request/:receiverId',
     {
       schema: {
-        tags: ['friend request'],
+        tags: ['friendRequest'],
         description: 'Get all pending friend requests for a user',
         security: [{ bearerAuth: [] }],
         params: {
@@ -50,7 +50,7 @@ export async function friendRequestRoutes(fastify: FastifyInstance) {
     '/friend/request/send',
     {
       schema: {
-        tags: ['friend request'],
+        tags: ['friendRequest'],
         description: 'Send a friend request',
         security: [{ bearerAuth: [] }],
         body: {
@@ -89,7 +89,7 @@ export async function friendRequestRoutes(fastify: FastifyInstance) {
     '/friend/request/accept',
     {
       schema: {
-        tags: ['friend request'],
+        tags: ['friendRequest'],
         description: 'Accept a friend request',
         security: [{ bearerAuth: [] }],
         body: {
@@ -126,7 +126,7 @@ export async function friendRequestRoutes(fastify: FastifyInstance) {
     '/friend/request/reject',
     {
       schema: {
-        tags: ['friend request'],
+        tags: ['friendRequest'],
         description: 'Reject a friend request',
         security: [{ bearerAuth: [] }],
         body: {
