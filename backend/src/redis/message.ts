@@ -27,6 +27,7 @@ export async function getRecentMessages(
   );
 
   if (messagesFromRedis.length > 0) {
+    console.log(`Retrieved ${messagesFromRedis.length} messages from Redis`);
   return messagesFromRedis.map((msg: any) => JSON.parse(msg));
   } else {
     const messagesFromDb = await getMessagesFromDB(groupId, 0, limit);

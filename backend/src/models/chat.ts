@@ -2,6 +2,7 @@
 interface redisMessage {
   groupId: string;
   senderId: string;
+  senderName: string;
   message: string;
 }
 
