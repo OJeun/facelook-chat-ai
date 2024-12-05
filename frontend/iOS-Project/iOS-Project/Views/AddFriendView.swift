@@ -28,7 +28,7 @@ struct AddFriendView: View {
                         responseMessage = message
                         showMessage = true
                         if message == "Friend request sent successfully!" {
-                            friendListViewModel.fetchFriends() // 친구 목록 갱신
+                            friendListViewModel.fetchFriends()
                         }
                     }
                 }) {

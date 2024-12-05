@@ -39,14 +39,14 @@ struct FriendRequestsView: View {
 
                                 Button("Accept") {
                                     viewModel.acceptRequest(requestId: request.id ?? 0) { message in
-                                        viewModel.fetchRequests() // Refresh the list
+                                        viewModel.fetchRequests()
                                     }
                                 }
                                 .buttonStyle(.bordered)
 
                                 Button("Reject") {
                                     viewModel.rejectRequest(requestId: request.id ?? 0) { message in
-                                        viewModel.fetchRequests() // Refresh the list
+                                        viewModel.fetchRequests()
                                     }
                                 }
                                 .buttonStyle(.bordered)
