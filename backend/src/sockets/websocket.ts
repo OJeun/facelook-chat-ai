@@ -65,7 +65,7 @@ export function setupWebsocket(server: FastifyInstance) {
 
 
     const recentMessages = await getRecentMessages(groupId);
-    console.log(`Sending ${recentMessages} recent messages to client`);
+    console.log(`!!!Sending ${recentMessages} recent messages to client`);
     socket.send(JSON.stringify({ type: "recentMessages", messages: recentMessages }));
 
     socket.on("message", async (messageBuffer) => {
