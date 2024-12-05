@@ -50,12 +50,19 @@ export async function getRecentMessagesFromRedis(groupId: string) {
   );
 
   if (messagesFromRedis.length > 0) {
-    console.log(`!!!!!Retrieved ${messagesFromRedis.length} messages from Redis`);
-    console.log(`!!!!!This is the message: ${messagesFromRedis[0]}`);
-    return messagesFromRedis.map((msg: any) => JSON.parse(msg));
+    console.log(`!!!!!Raw messages from Redis:`, messagesFromRedis);
+    return messagesFromRedis.map((msg: any) => {
+      try {
+        return JSON.parse(msg);
+      } catch (err) {
+        console.error(`!!!!!!Failed to parse message: ${msg}`, err);
+        return null; 
+      }
+    }).filter((msg) => msg !== null); 
   }
   return [];
 }
+
 
 export async function clearMessages(groupId: string) {
   await redisClient.del(`group:${groupId}:messages`);
