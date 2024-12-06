@@ -20,8 +20,16 @@ struct LeaderboardView: View {
                         .foregroundColor(.red)
                         .padding()
                 } else {
-                    List(viewModel.users) { user in
+                    List(viewModel.users.indices, id: \.self) { index in
+                        let user = viewModel.users[index]
                         HStack {
+                            // Rank Icon
+                            viewModel.rankIcon(for: index + 1)
+                                .font(.system(size: 30))
+                                .foregroundColor(index < 3 ? .blue : .gray)
+                                .frame(width: 30, alignment: .center)
+                            
+                            // User Info
                             VStack(alignment: .leading) {
                                 Text(user.name)
                                     .font(.headline)
