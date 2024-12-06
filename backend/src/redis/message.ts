@@ -128,16 +128,35 @@ export async function clearMessages(groupId: string) {
   await redisClient.del(`group:${groupId}:messages`);
 }
 
+// 添加新的 Redis key 来存储最后检查时间
+const LAST_CHECK_KEY = "lastAiAnalysisCheck";
+
 // execute every 10 seconds
 setInterval(async () => {
   try {
-    // 1. 获取所有群组ID
+    // 1. 获取上次检查时间
+    let lastCheckTime = await redisClient.get(LAST_CHECK_KEY);
+    const currentTime = new Date().toISOString();
+
+    // 如果没有上次检查时间，使用10秒前的时间
+    if (!lastCheckTime) {
+      const tenSecondsAgo = new Date(Date.now() - 10000).toISOString();
+      lastCheckTime = tenSecondsAgo;
+    }
+
+    // 2. 获取所有群组ID
     const groupIds = await redisClient.keys("group:*:messages");
 
-    // 2. 处理所有群组的聊天数据
+    // 3. 处理所有群组的聊天数据，只分析指定时间范围内的消息
     const chatPromises = groupIds.map(async (groupKey) => {
       const groupId = groupKey.split(":")[1];
-      const messages = await getRecentMessages(groupId);
+
+      // 获取时间范围内的消息
+      const messages = await getMessagesBetweenTimestamps(
+        groupId,
+        lastCheckTime,
+        currentTime
+      );
 
       if (messages.length === 0) {
         return null;
@@ -166,7 +185,6 @@ setInterval(async () => {
 
       return {
         id: parseInt(groupId),
-        // if userId is null, skip it
         messages: messages
           .filter((msg) => msg.senderId !== null)
           .map((msg) => ({
@@ -178,12 +196,12 @@ setInterval(async () => {
       };
     });
 
-    // 3. 等待所有聊天数据处理完成并过滤掉空值
+    // 4. 等待所有聊天数据处理完成并过滤掉空值
     const chats = (await Promise.all(chatPromises)).filter(
       (chat): chat is Chat => chat !== null
     );
 
-    // 4. 只有在有聊天数据时才执行AI分析
+    // 5. 只有在有聊天数据时才执行AI分析
     if (chats.length > 0) {
       const AiResults: FullAnalysisResult[] = await analyzeAllChats(chats);
 
@@ -245,6 +263,9 @@ setInterval(async () => {
         });
       });
     }
+
+    // 6. 更新最后检查时间
+    await redisClient.set(LAST_CHECK_KEY, currentTime);
   } catch (error) {
     console.error("Error during AI analysis:", error);
   }
