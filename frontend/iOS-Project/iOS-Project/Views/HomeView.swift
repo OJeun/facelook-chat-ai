@@ -23,7 +23,7 @@ struct HomeView: View {
             VStack(spacing: 10) {
                 HeaderView(
                     title: "Search",
-                    subtitle: "Find your friends",
+                    subtitle: "Find your groups",
                     angle: 0,
                     backColor: .blue,
                     image: "logo"

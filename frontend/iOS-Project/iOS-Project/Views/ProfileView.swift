@@ -22,19 +22,19 @@ struct ProfileView: View {
                     .foregroundColor(.gray)
                 
                 if let user = viewModel.user {
-                    // Name
-                    Text(user.name)
-                        .font(.system(size: 24, weight: .bold))
-                    
-                    Text("Email: \(user.email)")
-                        .font(.system(size: 16))
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                    
+                    VStack {
+                        HeaderView(
+                            title: "\(user.name)",
+                            subtitle: "\(user.email)",
+                            angle: -30,
+                            backColor: .blue,
+                            image: "logo"
+                        )
+                    }
+                        
                     Text("Achievement Points: \(user.achievementPoint)")
                         .font(.system(size: 16))
-                        .foregroundColor(.gray)
+                        .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 } else if !viewModel.errorMessage.isEmpty {
@@ -47,32 +47,26 @@ struct ProfileView: View {
                 }
 
                 // Buttons
-                HStack(spacing: 16) {
+                HStack(spacing: 15) {
                     NavigationLink(destination: EditProfileView()) {
-                        Text("Edit Profile")
-                            .frame(maxWidth: .infinity, maxHeight: 50)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
+                        ButtonView(
+                            title: "Edit Profile"
+                        )
                     }
 
                     NavigationLink(destination: FriendRequestsView()) {
-                        Text("Friend Request")
-                            .frame(maxWidth: .infinity, maxHeight: 50)
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(10)
+                        ButtonView(
+                            title: "Friend Request"
+                        )
                     }
 
                     NavigationLink(destination: AddFriendView()) {
-                        Text("Add Friend")
-                            .frame(maxWidth: .infinity, maxHeight: 50)
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(10)
+                        ButtonView(
+                            title: "Add Friend"
+                        )
                     }
                 }
                 .padding(.horizontal)
-                
-                Text("References").font(Font.system(size: 25, weight: .bold))
                 
                 Spacer()
 
@@ -87,6 +81,7 @@ struct ProfileView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                         .padding(.horizontal)
+                        .bold()
                 }
             }
             .padding()
