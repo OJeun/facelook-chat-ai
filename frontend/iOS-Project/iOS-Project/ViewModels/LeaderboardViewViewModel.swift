@@ -5,6 +5,7 @@
 //  Created by Aric Or on 2024-12-05.
 //
 
+import SwiftUI
 import Foundation
 
 class LeaderboardViewViewModel: ObservableObject {
@@ -39,11 +40,23 @@ class LeaderboardViewViewModel: ObservableObject {
                 do {
                     let response = try JSONDecoder().decode([String: [UserAchievement]].self, from: data)
                     // Sort the users by achievementPoint in descending order
-                    self.users = (response["users"] ?? []).sorted { $0.achievementPoint > $1.achievementPoint }
+                    let sortedUsers = (response["users"] ?? []).sorted { $0.achievementPoint > $1.achievementPoint }
+                    // Keep only the top 10 users
+                    self.users = Array(sortedUsers.prefix(10))
                 } catch {
                     self.errorMessage = "Failed to decode response: \(error.localizedDescription)"
                 }
             }
         }.resume()
+    }
+    
+    func rankIcon(for rank: Int) -> Image {
+        if rank <= 3 {
+            // Top 3 use filled circle
+            return Image(systemName: "\(rank).circle.fill")
+        } else {
+            // 4th and below use plain circle
+            return Image(systemName: "\(rank).circle")
+        }
     }
 }

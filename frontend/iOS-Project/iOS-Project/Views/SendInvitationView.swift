@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SendInvitationView: View {
     @ObservedObject var viewModel: SendInvitationViewViewModel
-    @State private var showAlert = false;
+    @State private var showAlert = false
     @State private var alertMessage = ""
 
     var body: some View {
@@ -19,31 +19,43 @@ struct SendInvitationView: View {
                     Text(viewModel.errorMessage)
                         .foregroundColor(.red)
                         .padding()
-                }
-
-                List(viewModel.friends, id: \.friendId) { friend in
-                    HStack {
-                        Text(friend.name)
-                        Spacer()
-                        Button("Invite") {
-                            viewModel.sendChatInvitation(receiverId: friend.friendId ?? 0) { message in
-                                alertMessage = message
-                                showAlert = true
+                } else if viewModel.friends.isEmpty {
+                    // Display message when no friends are found
+                    VStack {
+                        Text("You have no friends to add in the chat.")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                        Text("Add a new friend.")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                    .padding()
+                } else {
+                    // Display the list of friends
+                    List(viewModel.friends, id: \.friendId) { friend in
+                        HStack {
+                            Text(friend.name)
+                            Spacer()
+                            Button("Invite") {
+                                viewModel.sendChatInvitation(receiverId: friend.friendId ?? 0) { message in
+                                    alertMessage = message
+                                    showAlert = true
+                                }
                             }
+                            .buttonStyle(.bordered)
                         }
-                        .buttonStyle(.bordered)
                     }
                 }
-                .onAppear {
-                    viewModel.fetchFriends()
-                }
-                .alert(isPresented: $showAlert) {
-                    Alert(
-                        title: Text("Invitation Sent"),
-                        message: Text(alertMessage),
-                        dismissButton: .default(Text("OK"))
-                    )
-                }
+            }
+            .onAppear {
+                viewModel.fetchFriends()
+            }
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("Invitation Sent"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK"))
+                )
             }
             .navigationTitle("Send Invitation")
         }

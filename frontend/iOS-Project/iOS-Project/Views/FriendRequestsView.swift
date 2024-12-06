@@ -20,7 +20,7 @@ struct FriendRequestsView: View {
                 }
 
                 if viewModel.requests.isEmpty {
-                    Text("No friend requests.")
+                    Text("No new friend requests.")
                         .foregroundColor(.gray)
                         .padding()
                 } else {

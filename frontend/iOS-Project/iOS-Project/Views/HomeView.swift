@@ -67,8 +67,17 @@ struct HomeView: View {
                         .padding(.horizontal, 16)
                 
                 // Create Group Button
-                Button("Create Group") {
-                    viewModel.showCreateGroupForm = true
+                HStack(spacing: 16) {
+                    Button("Create Group") {
+                        viewModel.showCreateGroupForm = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                    NavigationLink(destination: InvitationView()) {
+                        Text("View Invitations")
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                    }
                 }
                 .padding()
                 .buttonStyle(.borderedProminent)
