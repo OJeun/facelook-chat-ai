@@ -130,117 +130,118 @@ export async function clearMessages(groupId: string) {
 
 // execute every 10 seconds
 setInterval(async () => {
-  var chats: Chat[] = [];
   try {
+    // 1. 获取所有群组ID
     const groupIds = await redisClient.keys("group:*:messages");
 
+    // 2. 处理所有群组的聊天数据
     const chatPromises = groupIds.map(async (groupKey) => {
       const groupId = groupKey.split(":")[1];
       const messages = await getRecentMessages(groupId);
 
-      var userIds: any[] = [];
-
-      if (messages.length > 0) {
-        const scorePromises = messages.map(async (msg) => {
-          const userId = msg.senderId;
-
-          if (!userIds.includes(userId)) {
-            userIds.push(userId);
-            const score = await sendQueryToDB(
-              `SELECT userSentimentScore FROM userGroup WHERE userId = ${msg.senderId} AND groupId = ${groupId};`
-            );
-            console.log(
-              "user id ",
-              userId,
-              " has a sentiment score of ",
-              score
-            );
-            return {
-              userId: userId,
-              score: score && score[0] ? score[0].userSentimentScore : 0,
-            };
-          }
-        });
-
-        const scores = await Promise.all(scorePromises);
-
-        return {
-          id: parseInt(groupId),
-          messages: messages.map((msg) => ({
-            message: msg.content,
-            userId: msg.senderId,
-            messageId: msg.id,
-          })),
-          sentimentScores: scores,
-        };
+      if (messages.length === 0) {
+        return null;
       }
-      return null;
+
+      const userIds: any[] = [];
+      const scorePromises = messages.map(async (msg) => {
+        const userId = msg.senderId;
+        if (!userIds.includes(userId)) {
+          userIds.push(userId);
+          const score = await sendQueryToDB(
+            `SELECT userSentimentScore FROM userGroup WHERE userId = ${msg.senderId} AND groupId = ${groupId};`
+          );
+          return {
+            userId: userId,
+            score: score && score[0] ? score[0].userSentimentScore : 0,
+          };
+        }
+        return null;
+      });
+
+      // 等待所有分数查询完成
+      const scores = (await Promise.all(scorePromises)).filter(
+        (score) => score !== null
+      );
+
+      return {
+        id: parseInt(groupId),
+        messages: messages.map((msg) => ({
+          message: msg.content,
+          userId: msg.senderId,
+          messageId: msg.id,
+        })),
+        sentimentScores: scores,
+      };
     });
 
-    // wait for all group chats to be processed
-    const completedChats = await Promise.all(chatPromises);
-    // filter out null values
-    chats = completedChats.filter((chat): chat is Chat => chat !== null);
+    // 3. 等待所有聊天数据处理完成并过滤掉空值
+    const chats = (await Promise.all(chatPromises)).filter(
+      (chat): chat is Chat => chat !== null
+    );
 
-    const AiResults: FullAnalysisResult[] = await analyzeAllChats(chats);
+    // 4. 只有在有聊天数据时才执行AI分析
+    if (chats.length > 0) {
+      const AiResults: FullAnalysisResult[] = await analyzeAllChats(chats);
 
-    AiResults.forEach(async (result) => {
-      const groupId = result.chatId;
-      // broadcast emoji first
-      if (connectedClients[groupId]) {
-        // Transform emojis into the required format
-        const formattedEmojis = result.emojis.map((emojiResult) => ({
-          emoji: emojiResult.emoji,
-          userId: emojiResult.userId.toString(),
-          messageId: emojiResult.messageId.toString(),
-        }));
+      AiResults.forEach(async (result) => {
+        const groupId = result.chatId;
+        // broadcast emoji first
+        if (connectedClients[groupId]) {
+          // Transform emojis into the required format
+          const formattedEmojis = result.emojis.map((emojiResult) => ({
+            emoji: emojiResult.emoji,
+            userId: emojiResult.userId.toString(),
+            messageId: emojiResult.messageId.toString(),
+          }));
 
-        for (const client of connectedClients[groupId]) {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(
-              JSON.stringify({
-                type: "newEmojis",
-                emojis: formattedEmojis,
-              })
-            );
+          for (const client of connectedClients[groupId]) {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(
+                JSON.stringify({
+                  type: "newEmojis",
+                  emojis: formattedEmojis,
+                })
+              );
+            }
           }
         }
-      }
 
-      result.sentimentScores.forEach(async (scoreObj) => {
-        // get user's original achievement point
-        const originalAchievementPointObj = await sendQueryToDB(
-          `SELECT achievementPoint FROM user WHERE userId = ${scoreObj.userId};`
-        );
+        result.sentimentScores.forEach(async (scoreObj) => {
+          // get user's original achievement point
+          const originalAchievementPointObj = await sendQueryToDB(
+            `SELECT achievementPoint FROM user WHERE userId = ${scoreObj.userId};`
+          );
 
-        const originalAchievementPoint =
-          originalAchievementPointObj[0].achievementPoint;
+          const originalAchievementPoint =
+            originalAchievementPointObj[0].achievementPoint;
 
-        // update user's achievement point
-        await sendQueryToDB(
-          `UPDATE user SET achievementPoint = ${
-            originalAchievementPoint + scoreObj.achievementScore
-          } WHERE userId = ${scoreObj.userId};`
-        );
-        console.log(
-          `Updated user ${
-            scoreObj.userId
-          }'s achievement point from ${originalAchievementPoint} to ${
-            originalAchievementPoint + scoreObj.achievementScore
-          }`
-        );
+          // update user's achievement point
+          await sendQueryToDB(
+            `UPDATE user SET achievementPoint = ${
+              originalAchievementPoint + scoreObj.achievementScore
+            } WHERE userId = ${scoreObj.userId};`
+          );
+          console.log(
+            `Updated user ${
+              scoreObj.userId
+            }'s achievement point from ${originalAchievementPoint} to ${
+              originalAchievementPoint + scoreObj.achievementScore
+            }`
+          );
 
-        // update user's sentiment score
-        await sendQueryToDB(
-          `UPDATE userGroup 
-           SET userSentimentScore = ${Number(scoreObj.score).toFixed(1)} 
-           WHERE userId = ${scoreObj.userId} AND groupId = ${groupId};`
-        );
-        console.log(
-          `Updated user ${scoreObj.userId}'s sentiment score to ${scoreObj.score} in group ${groupId}`
-        );
+          // update user's sentiment score
+          await sendQueryToDB(
+            `UPDATE userGroup 
+             SET userSentimentScore = ${Number(scoreObj.score).toFixed(1)} 
+             WHERE userId = ${scoreObj.userId} AND groupId = ${groupId};`
+          );
+          console.log(
+            `Updated user ${scoreObj.userId}'s sentiment score to ${scoreObj.score} in group ${groupId}`
+          );
+        });
       });
-    });
+    }
   } catch (error) {
     console.error("Error during AI analysis:", error);
   }
