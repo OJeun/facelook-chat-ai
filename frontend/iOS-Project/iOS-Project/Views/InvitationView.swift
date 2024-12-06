@@ -64,7 +64,7 @@ struct InvitationRow: View {
     }
 
     private func handleInvitationAction(isAccepting: Bool) {
-        let action = isAccepting ? "accept" : "reject"
+        _ = isAccepting ? "accept" : "reject"
         let actionMethod = isAccepting ? viewModel.acceptInvitation : viewModel.rejectInvitation
 
         actionMethod(invitation.id) { message in

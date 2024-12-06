@@ -64,7 +64,7 @@ struct ChatView: View {
         ScrollView {
             ScrollViewReader { proxy in
                 VStack(spacing: 12) {
-                    ForEach(viewModel.messages.reversed()) { message in
+                    ForEach(viewModel.messages) { message in
                         MessageRow(message: message, isCurrentUser: message.senderId == viewModel.currentUserId)
                             .id(message.id)
                     }

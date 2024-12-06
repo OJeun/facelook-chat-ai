@@ -10,7 +10,7 @@ import SwiftUI
 struct SignUpView: View {
     @StateObject private var viewModel = SignUpViewViewModel()
     let onSignUpSuccess: (Int, String, String) -> Void
-    @Environment(\.dismiss) private var dismiss // Used to navigate back to the login view
+    @Environment(\.dismiss) private var dismiss // navigate back to the login view
 
     var body: some View {
         VStack {
