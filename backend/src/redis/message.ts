@@ -209,7 +209,6 @@ setInterval(async () => {
         const groupId = result.chatId;
         // broadcast emoji first
         if (connectedClients[groupId]) {
-          // Transform emojis into the required format
           const formattedEmojis = result.emojis.map((emojiResult) => ({
             emoji: emojiResult.emoji,
             userId: emojiResult.userId.toString(),
@@ -228,39 +227,60 @@ setInterval(async () => {
           }
         }
 
-        result.sentimentScores.forEach(async (scoreObj) => {
-          // get user's original achievement point
-          const originalAchievementPointObj = await sendQueryToDB(
-            `SELECT achievementPoint FROM user WHERE userId = ${scoreObj.userId};`
-          );
+        for (const scoreObj of result.sentimentScores) {
+          try {
+            // 获取用户原始成就点数
+            const originalAchievementPointObj = await sendQueryToDB(
+              `SELECT achievementPoint FROM user WHERE userId = ${scoreObj.userId};`
+            );
 
-          const originalAchievementPoint =
-            originalAchievementPointObj[0].achievementPoint;
+            // 检查查询结果是否有效
+            if (
+              !originalAchievementPointObj ||
+              !originalAchievementPointObj[0]
+            ) {
+              console.error(
+                `No achievement point found for user ${scoreObj.userId}`
+              );
+              continue;
+            }
 
-          // update user's achievement point
-          await sendQueryToDB(
-            `UPDATE user SET achievementPoint = ${
-              originalAchievementPoint + scoreObj.achievementScore
-            } WHERE userId = ${scoreObj.userId};`
-          );
-          console.log(
-            `Updated user ${
-              scoreObj.userId
-            }'s achievement point from ${originalAchievementPoint} to ${
-              originalAchievementPoint + scoreObj.achievementScore
-            }`
-          );
+            const originalAchievementPoint =
+              originalAchievementPointObj[0].achievementPoint || 0;
 
-          // update user's sentiment score
-          await sendQueryToDB(
-            `UPDATE userGroup 
-             SET userSentimentScore = ${Number(scoreObj.score).toFixed(1)} 
-             WHERE userId = ${scoreObj.userId} AND groupId = ${groupId};`
-          );
-          console.log(
-            `Updated user ${scoreObj.userId}'s sentiment score to ${scoreObj.score} in group ${groupId}`
-          );
-        });
+            // 更新用户成就点数
+            await sendQueryToDB(
+              `UPDATE user SET achievementPoint = ${
+                originalAchievementPoint + scoreObj.achievementScore
+              } WHERE userId = ${scoreObj.userId};`
+            );
+
+            console.log(
+              `Updated user ${
+                scoreObj.userId
+              }'s achievement point from ${originalAchievementPoint} to ${
+                originalAchievementPoint + scoreObj.achievementScore
+              }`
+            );
+
+            // 更新用户情感分数
+            await sendQueryToDB(
+              `UPDATE userGroup 
+               SET userSentimentScore = ${Number(scoreObj.score).toFixed(1)} 
+               WHERE userId = ${scoreObj.userId} AND groupId = ${groupId};`
+            );
+
+            console.log(
+              `Updated user ${scoreObj.userId}'s sentiment score to ${scoreObj.score} in group ${groupId}`
+            );
+          } catch (error) {
+            console.error(
+              `Error processing score for user ${scoreObj.userId}:`,
+              error
+            );
+            continue;
+          }
+        }
       });
     }
 
