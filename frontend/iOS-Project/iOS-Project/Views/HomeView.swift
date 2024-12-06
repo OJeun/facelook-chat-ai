@@ -19,32 +19,6 @@ struct HomeView: View {
     }
     
     var body: some View {
-<<<<<<< HEAD
-        NavigationStack {
-            VStack {
-                // Top Navigation Bar
-                HStack {
-                    Spacer()
-                    RoundedRectangle(cornerRadius: 10)
-                        .frame(height: 36)
-                        .foregroundColor(.gray.opacity(0.2))
-                        .overlay(
-                            HStack {
-                                Image(systemName: "magnifyingglass")
-                                    .foregroundColor(.gray)
-                                Text("Search")
-                                    .foregroundColor(.gray)
-                            }
-                            .padding(.horizontal)
-                        )
-                    Spacer()
-                    Image(systemName: "magnifyingglass")
-                        .imageScale(.large)
-                        .padding(.trailing)
-                }
-                .padding(.vertical)
-
-=======
         NavigationView {
             VStack(spacing: 10) {
                 HeaderView(
@@ -56,7 +30,6 @@ struct HomeView: View {
                 )
                 SearchView()
                 
->>>>>>> fiona_ui/ux
                 // Group Content
                 VStack {
                     if viewModel.isLoading {
@@ -94,23 +67,8 @@ struct HomeView: View {
                         .padding(.horizontal, 16)
                 
                 // Create Group Button
-<<<<<<< HEAD
-                HStack(spacing: 16) {
-                    Button("Create Group") {
-                        showCreateGroupForm = true
-                    }
-                    .buttonStyle(.borderedProminent)
-
-                    NavigationLink(destination: InvitationView()) {
-                        Text("View Invitations")
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
-                    }
-=======
                 Button("Create Group") {
                     viewModel.showCreateGroupForm = true
->>>>>>> fiona_ui/ux
                 }
                 .padding()
                 .buttonStyle(.borderedProminent)
