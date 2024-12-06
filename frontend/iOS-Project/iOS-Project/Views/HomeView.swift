@@ -45,28 +45,37 @@ struct HomeView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
+            VStack(spacing: 10) {
+                HeaderView(
+                    title: "Search",
+                    subtitle: "Find your friends",
+                    angle: 0,
+                    backColor: .blue,
+                    image: "logo"
+                )
                 // Top Navigation Bar
                 HStack {
                     Spacer()
                     RoundedRectangle(cornerRadius: 10)
-                        .frame(height: 36)
-                        .foregroundColor(.gray.opacity(0.2))
+                        .frame(height: 40)
+                        .foregroundColor(.white.opacity(0.3))
                         .overlay(
                             HStack {
-                                Image(systemName: "magnifyingglass")
-                                    .foregroundColor(.gray)
                                 Text("Search")
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(.white)
                             }
-                            .padding(.horizontal)
                         )
                     Spacer()
                     Image(systemName: "magnifyingglass")
                         .imageScale(.large)
                         .padding(.trailing)
+                        .foregroundColor(.white)
                 }
+                .padding(.top, 5)
+                .offset(y:-35)
                 .padding(.vertical)
+                .padding(.horizontal, 20)
+            
 
                 // Group Content
                 VStack {

@@ -19,7 +19,8 @@ struct SignUpView: View {
                 title: "Register",
                 subtitle: "Sign up, Today!",
                 angle: 30,
-                backColor: .blue
+                backColor: .blue,
+                image: "facelook-white"
             )
             
             ZStack {

@@ -17,7 +17,8 @@ struct LoginView: View {
                     title: "Login",
                     subtitle: "Access your account",
                     angle: 30,
-                    backColor: .blue
+                    backColor: .blue,
+                    image: "facelook-white"
                 )
 
                 // Form

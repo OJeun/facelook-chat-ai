@@ -12,6 +12,7 @@ struct HeaderView: View {
     let subtitle: String
     let angle: Double
     let backColor: Color
+    let image: String
 
     var body: some View {
         ZStack {
@@ -21,7 +22,7 @@ struct HeaderView: View {
                 .frame(height:600)
             
             VStack {
-                Image("facelook-white")
+                Image(image)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 250, height: 250)
@@ -49,6 +50,7 @@ struct HeaderView: View {
         title: "Login",
         subtitle: "Access your account",
         angle: 15,
-        backColor: .blue
+        backColor: .blue,
+        image: "facelook-white"
     )
 }
