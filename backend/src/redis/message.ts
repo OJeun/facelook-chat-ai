@@ -149,9 +149,15 @@ setInterval(async () => {
             const score = await sendQueryToDB(
               `SELECT userSentimentScore FROM userGroup WHERE userId = ${msg.senderId} AND groupId = ${groupId};`
             );
+            console.log(
+              "user id ",
+              userId,
+              " has a sentiment score of ",
+              score
+            );
             return {
               userId: userId,
-              score: score[0].score,
+              score: score && score[0] ? score[0].userSentimentScore : 0,
             };
           }
         });
