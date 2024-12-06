@@ -7,7 +7,7 @@ import {
 } from "../redis/message";
 import { dumpMessagesToDB } from "../redis/dumpService";
 
-const connectedClients: Record<string, Set<WebSocket>> = {};
+export const connectedClients: Record<string, Set<WebSocket>> = {};
 
 export function setupWebsocket(server: FastifyInstance) {
   // Create a WebSocket server and attach it to the Fastify server

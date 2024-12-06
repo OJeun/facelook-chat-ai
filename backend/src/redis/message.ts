@@ -1,9 +1,10 @@
 import { redisClient } from "./client";
 import { redisMessage, redisMessageWithTimeStamp } from "../models/chat";
 import { getMessagesFromDB } from "../services/databaseService";
-import { Chat, AiAnalysisResult, FullAnalysisResult } from "../models/chat";
+import { Chat, FullAnalysisResult } from "../models/chat";
 import { analyzeAllChats } from "../services/openai";
 import { sendQueryToDB } from "../services/databaseService";
+import { connectedClients } from "../sockets/websocket";
 
 // Save a message to the group's message list
 export async function saveMessage(message: redisMessage) {
@@ -137,16 +138,22 @@ setInterval(async () => {
       const groupId = groupKey.split(":")[1];
       const messages = await getRecentMessages(groupId);
 
+      var userIds: any[] = [];
+
       if (messages.length > 0) {
         const scorePromises = messages.map(async (msg) => {
           const userId = msg.senderId;
-          const score = await sendQueryToDB(
-            `SELECT score FROM users WHERE id = ${userId}`
-          );
-          return {
-            userId: userId,
-            score: score[0].score,
-          };
+
+          if (!userIds.includes(userId)) {
+            userIds.push(userId);
+            const score = await sendQueryToDB(
+              `SELECT userSentimentScore FROM userGroup WHERE userId = ${msg.senderId} AND groupId = ${groupId};`
+            );
+            return {
+              userId: userId,
+              score: score[0].score,
+            };
+          }
         });
 
         const scores = await Promise.all(scorePromises);
@@ -172,54 +179,63 @@ setInterval(async () => {
     const AiResults: FullAnalysisResult[] = await analyzeAllChats(chats);
 
     AiResults.forEach(async (result) => {
-      await saveAiAnalysisResult(result.chatId, result);
+      const groupId = result.chatId;
+      // broadcast emoji first
+      if (connectedClients[groupId]) {
+        // Transform emojis into the required format
+        const formattedEmojis = result.emojis.map((emojiResult) => ({
+          emoji: emojiResult.emoji,
+          userId: emojiResult.userId.toString(),
+          messageId: emojiResult.messageId.toString(),
+        }));
 
-      console.log(`AI analysis result saved for group ${result.chatId}`);
+        for (const client of connectedClients[groupId]) {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(
+              JSON.stringify({
+                type: "newEmojis",
+                emojis: formattedEmojis,
+              })
+            );
+          }
+        }
+      }
+
+      result.sentimentScores.forEach(async (scoreObj) => {
+        // get user's original achievement point
+        const originalAchievementPointObj = await sendQueryToDB(
+          `SELECT achievementPoint FROM user WHERE userId = ${scoreObj.userId};`
+        );
+
+        const originalAchievementPoint =
+          originalAchievementPointObj[0].achievementPoint;
+
+        // update user's achievement point
+        await sendQueryToDB(
+          `UPDATE user SET achievementPoint = ${
+            originalAchievementPoint + scoreObj.achievementScore
+          } WHERE userId = ${scoreObj.userId};`
+        );
+        console.log(
+          `Updated user ${
+            scoreObj.userId
+          }'s achievement point from ${originalAchievementPoint} to ${
+            originalAchievementPoint + scoreObj.achievementScore
+          }`
+        );
+
+        // update user's sentiment score
+        await sendQueryToDB(
+          `UPDATE userGroup 
+           SET userSentimentScore = ${Number(scoreObj.score).toFixed(1)} 
+           WHERE userId = ${scoreObj.userId} AND groupId = ${groupId};`
+        );
+        console.log(
+          `Updated user ${scoreObj.userId}'s sentiment score to ${scoreObj.score} in group ${groupId}`
+        );
+      });
     });
   } catch (error) {
     console.error("Error during AI analysis:", error);
   }
 }, 10000);
-
-export async function saveAiAnalysisResult(
-  groupId: string,
-  analysisResult: FullAnalysisResult
-): Promise<void> {
-  try {
-    const aiAnalysisResult: AiAnalysisResult = {
-      chatId: groupId,
-      analysisResult: analysisResult,
-      timestamp: new Date().toISOString(),
-    };
-
-    // save to Redis, using group:${groupId}:aiAnalysis as key
-    await redisClient.set(
-      `group:${groupId}:aiAnalysis`,
-      JSON.stringify(aiAnalysisResult)
-    );
-
-    console.log(`AI analysis result saved for group ${groupId}`);
-  } catch (error) {
-    console.error(
-      `Failed to save AI analysis result for group ${groupId}:`,
-      error
-    );
-    throw error;
-  }
-}
-
-// get the ai analysis result from redis regardless of the timestamp
-export async function getAiAnalysisResult(
-  groupId: string
-): Promise<AiAnalysisResult | null> {
-  try {
-    const result = await redisClient.get(`group:${groupId}:aiAnalysis`);
-    return result ? JSON.parse(result) : null;
-  } catch (error) {
-    console.error(
-      `Failed to get AI analysis result for group ${groupId}:`,
-      error
-    );
-    return null;
-  }
-}

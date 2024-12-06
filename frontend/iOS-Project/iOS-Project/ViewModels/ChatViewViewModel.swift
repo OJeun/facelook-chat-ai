@@ -1,6 +1,19 @@
 import Foundation
 import Combine
 
+// Add new struct for emoji response
+struct EmojiResponse: Codable {
+    let emoji: String
+    let userId: String
+    let messageId: String
+}
+
+struct WebSocketResponse: Codable {
+    let type: String
+    let messages: [Message]?
+    let emojis: [EmojiResponse]?  // Add this line
+}
+
 class ChatViewViewModel: ObservableObject {
     @Published var messages: [Message] = []
     @Published var newMessage: String = ""
@@ -63,15 +76,24 @@ class ChatViewViewModel: ObservableObject {
         case .string(let text):
             if let data = text.data(using: .utf8),
                let response = try? JSONDecoder().decode(WebSocketResponse.self, from: data) {
-                if response.type == "recentMessages", let messages = response.messages {
-                    DispatchQueue.main.async {
-                        self.messages.append(contentsOf: messages)
-                    }
-                } else if response.type == "newMessage", let messages = response.messages, let newMessage = messages.first {
-                    DispatchQueue.main.async {
-                        if !self.messages.contains(where: { $0.id == newMessage.id }) {
-                            self.messages.append(newMessage)
+                DispatchQueue.main.async {
+                    switch response.type {
+                    case "recentMessages":
+                        if let messages = response.messages {
+                            self.messages.append(contentsOf: messages)
                         }
+                    case "newMessage":
+                        if let messages = response.messages, let newMessage = messages.first {
+                            if !self.messages.contains(where: { $0.id == newMessage.id }) {
+                                self.messages.append(newMessage)
+                            }
+                        }
+                    case "newEmojis":
+                        if let emojis = response.emojis {
+                            self.updateMessagesWithEmojis(emojis)
+                        }
+                    default:
+                        print("Unknown message type: \(response.type)")
                     }
                 }
             } else {
@@ -80,6 +102,22 @@ class ChatViewViewModel: ObservableObject {
         default:
             print("Unsupported WebSocket message type")
         }
+    }
+    
+    private func updateMessagesWithEmojis(_ emojis: [EmojiResponse]) {
+        guard !emojis.isEmpty else { return }
+        
+        var updatedMessages = self.messages
+        
+        for emoji in emojis {
+            if let index = updatedMessages.firstIndex(where: { $0.id == emoji.messageId }) {
+                updatedMessages[index].emoji = emoji.emoji
+            } else {
+                print("Warning: Message not found for emoji: \(emoji)")
+            }
+        }
+        
+        self.messages = updatedMessages
     }
     
     func sendMessage() {
@@ -107,23 +145,5 @@ class ChatViewViewModel: ObservableObject {
            // self.messages.append(message)
             // self.newMessage = ""
         // }
-    }
-    
-    func addEmojisToMessages() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
-            guard let self = self else { return }
-
-            // Example emojis to assign
-            let emojis = ["😊", "😋", "😄", "🤔", "😍", "😢", "😡", "😎", "🥳"]
-            var updatedMessages = self.messages
-
-            // Assign emojis randomly to the messages
-            for i in 0..<updatedMessages.count {
-                let randomEmoji = emojis.randomElement() ?? "😃"
-                updatedMessages[i].emoji = randomEmoji
-            }
-
-            self.messages = updatedMessages
-        }
     }
 }
