@@ -8,30 +8,22 @@
 import SwiftUI
 
 struct ButtonView: View {
-    let title: String
-    let backgroundColor: Color = .white
-    let foregroundColor: Color = .gray
-    let borderColor: Color = .gray
-    let action: (() -> Void)? = nil
-    
+    var title: String
+
     var body: some View {
-        Button(action: {
-            action?()
-        }) {
-            Text(title)
-                .bold()
-                .frame(maxWidth: .infinity, maxHeight: 50)
-                .background(backgroundColor)
-                .foregroundColor(foregroundColor)
-                .cornerRadius(10)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(borderColor, lineWidth: 5)
-                )
-        }
+        Text(title)
+            .bold()
+            .frame(maxWidth: .infinity, maxHeight: 50)
+            .background(Color.white)
+            .foregroundColor(.gray)
+            .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.gray, lineWidth: 2)
+            )
     }
 }
 
 #Preview {
-    ButtonView(title: "Button")
+    ButtonView(title: "Sample Button")
 }

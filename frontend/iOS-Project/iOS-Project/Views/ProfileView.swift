@@ -32,11 +32,12 @@ struct ProfileView: View {
                         )
                     }
                         
-                    Text("Achievement Points: \(user.achievementPoint)")
+                Text("Achievement Points: \(user.achievementPoint)")
                         .font(.system(size: 16))
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
+                        .bold()
                 } else if !viewModel.errorMessage.isEmpty {
                     Text(viewModel.errorMessage)
                         .foregroundColor(.red)
@@ -49,21 +50,15 @@ struct ProfileView: View {
                 // Buttons
                 HStack(spacing: 15) {
                     NavigationLink(destination: EditProfileView()) {
-                        ButtonView(
-                            title: "Edit Profile"
-                        )
+                        ButtonView(title: "Edit Profile")
                     }
 
                     NavigationLink(destination: FriendRequestsView()) {
-                        ButtonView(
-                            title: "Friend Request"
-                        )
+                        ButtonView(title: "Friend Request")
                     }
 
                     NavigationLink(destination: AddFriendView()) {
-                        ButtonView(
-                            title: "Add Friend"
-                        )
+                        ButtonView(title: "Add Friend")
                     }
                 }
                 .padding(.horizontal)
@@ -71,18 +66,7 @@ struct ProfileView: View {
                 Spacer()
 
                 // Logout Button
-                Button(action: {
-                    viewModel.logout()
-                    isLoggedIn = false
-                }) {
-                    Text("Logout")
-                        .frame(maxWidth: .infinity, maxHeight: 50)
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                        .bold()
-                }
+                LogoutButtonView(viewModel: viewModel, isLoggedIn: $isLoggedIn)
             }
             .padding()
             .onAppear {
@@ -95,3 +79,4 @@ struct ProfileView: View {
 #Preview {
     ProfileView(isLoggedIn: .constant(true))
 }
+
