@@ -13,8 +13,7 @@ struct LoginView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                // Header section
+            VStack(spacing: 10) {
                 HeaderView(
                     title: "Login",
                     subtitle: "Access your account",
@@ -26,7 +25,7 @@ struct LoginView: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 15)
                         .fill(Color(UIColor.systemGray6))
-                        .frame(maxWidth: 350, minHeight: 200)
+                        .frame(maxWidth: 350, maxHeight: 250)
                         .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 3)
 
                     VStack(alignment: .leading, spacing: 15) {
@@ -55,25 +54,23 @@ struct LoginView: View {
                         }
                         .buttonStyle(.borderedProminent)
                         .frame(maxWidth: 300)
+                        
+                        // Sign-up
+                        HStack {
+                            Text("Don't have an account?")
+                                .foregroundColor(.gray)
+                            
+                            NavigationLink(destination: SignUpView(onSignUpSuccess: { userID, userName, email in
+                                print("Sign Up successful! User ID: \(userID), User Name: \(userName), Email: \(email)")
+                            })) {
+                                Text("Sign Up")
+                                    .foregroundColor(.blue)
+                                    .fontWeight(.bold)
+                            }
+                        }
                     }
                     .frame(maxWidth: .infinity)
                 }
-
-                // Sign-up prompt
-                VStack {
-                    Text("Don't have an account?")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                    
-                    NavigationLink(destination: SignUpView(onSignUpSuccess: { userID, userName, email in
-                        print("Sign Up successful! User ID: \(userID), User Name: \(userName), Email: \(email)")
-                    })) {
-                        Text("Sign Up")
-                            .foregroundColor(.blue)
-                            .fontWeight(.bold)
-                    }
-                }
-
                 Spacer()
             }
             .padding()

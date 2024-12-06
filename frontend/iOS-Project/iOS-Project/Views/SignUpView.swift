@@ -13,36 +13,58 @@ struct SignUpView: View {
     @Environment(\.dismiss) private var dismiss // Used to navigate back to the login view
 
     var body: some View {
-        VStack {
-            Text("Let's Register")
-                .font(.title)
-            Form {
-                if !viewModel.errorMessage.isEmpty {
-                    Text(viewModel.errorMessage)
-                        .foregroundColor(.red)
-                }
+        VStack(spacing: 20) {
+            // Header section
+            HeaderView(
+                title: "Register",
+                subtitle: "Sign up, Today!",
+                angle: 15,
+                backColor: .blue
+            )
+            
+            ZStack {
+                // Background RoundedRectangle
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(Color(UIColor.systemGray6))
+                    .frame(maxWidth: 350, minHeight: 200)
+                    .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 3)
 
-                TextField("Email", text: $viewModel.email)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled()
-
-                SecureField("Password", text: $viewModel.password)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                
-                TextField("Name", text: $viewModel.name)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled()
-
-                Button("Sign Up") {
-                    viewModel.signUp { userID, userName, email in
-                        onSignUpSuccess(userID, userName, email)
-                        dismiss()
+                VStack(alignment: .leading, spacing: 15) {
+                    if !viewModel.errorMessage.isEmpty {
+                        Text(viewModel.errorMessage)
+                            .foregroundColor(.red)
                     }
+                    
+                    // Email input
+                    TextField("Email", text: $viewModel.email)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .autocorrectionDisabled()
+                        .frame(maxWidth: 300)
+                    
+                    // Password input
+                    SecureField("Password", text: $viewModel.password)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(maxWidth: 300)
+                    
+                    // Name input
+                    TextField("Name", text: $viewModel.name)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .autocorrectionDisabled()
+                        .frame(maxWidth: 300)
+                    
+                    // Sign-Up button
+                    Button("Sign Up") {
+                        viewModel.signUp { userID, userName, email in
+                            onSignUpSuccess(userID, userName, email)
+                            dismiss()
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .frame(maxWidth: .infinity)
+                .padding()
             }
 
             Spacer()
