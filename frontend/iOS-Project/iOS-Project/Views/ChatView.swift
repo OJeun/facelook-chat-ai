@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ChatView: View {
     @ObservedObject var viewModel: ChatViewViewModel
+    @State private var showSendInvitationView = false
 
     var body: some View {
         VStack {
@@ -19,13 +20,21 @@ struct ChatView: View {
                     .foregroundColor(.primary)
                 Spacer()
                 Button(action: {
-                    print("Add person to chat room")
+                    showSendInvitationView = true
                 }) {
                     Image(systemName: "plus")
                         .font(.title2)
                         .padding()
                         .background(Color.blue.opacity(0.1))
                         .clipShape(Circle())
+                }
+                .sheet(isPresented: $showSendInvitationView) {
+                    SendInvitationView(
+                        viewModel: SendInvitationViewViewModel(
+                            groupId: viewModel.groupId,
+                            currentUserId: Int(viewModel.currentUserId) ?? 0
+                        )
+                    )
                 }
             }
             .padding(.horizontal)
@@ -51,46 +60,18 @@ struct ChatView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-//    private var messageList: some View {
-//        ScrollView {
-//            ScrollViewReader { proxy in
-//                VStack(spacing: 12) {
-//                    // Display the messages in reverse order for correct chronological display
-//                    ForEach(Array(viewModel.messages.reversed().enumerated()), id: \.offset) { index, message in
-//                        MessageRow(message: message, isCurrentUser: message.senderId == viewModel.currentUserId)
-//                            .id(message.id) // This remains for animation purposes
-//                    }
-//                }
-//                .onChange(of: viewModel.messages) { _, newMessages in
-//                    if let lastMessage = newMessages.last {
-//                        // Scroll to the bottom to show the most recent message
-//                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
-//                    }
-//                }
-//            }
-//        }
-//    }
     private var messageList: some View {
         ScrollView {
             ScrollViewReader { proxy in
                 VStack(spacing: 12) {
-                    ForEach(viewModel.messages.reversed(), id: \.id) { message in
+                    ForEach(viewModel.messages.reversed()) { message in
                         MessageRow(message: message, isCurrentUser: message.senderId == viewModel.currentUserId)
-                    }
-                }
-                .onAppear {
-                    if let lastMessage = viewModel.messages.last {
-                        print(lastMessage.content)
-                        DispatchQueue.main.async {
-                            proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                        }
+                            .id(message.id)
                     }
                 }
                 .onChange(of: viewModel.messages) { _, newMessages in
                     if let lastMessage = newMessages.last {
-                        DispatchQueue.main.async {
-                            proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                        }
+                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
                     }
                 }
             }

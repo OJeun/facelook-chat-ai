@@ -88,7 +88,7 @@ class LoginViewViewModel: ObservableObject {
         print("  UserID: \(response.user.userId)")
         print("  Name: \(response.user.name)")
         print("  Achievement Points: \(response.user.achievementPoint)")
-        print("  Token: \(response.token)")
+        print("  Token: \(response.token!)")
     }
 
     static func getAuthorizationHeader() -> [String: String]? {

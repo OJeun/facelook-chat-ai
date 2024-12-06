@@ -44,7 +44,7 @@ struct HomeView: View {
     @State private var selectedGroup: UserGroup?
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 // Top Navigation Bar
                 HStack {
@@ -102,8 +102,18 @@ struct HomeView: View {
                 .padding()
 
                 // Create Group Button
-                Button("Create Group") {
-                    showCreateGroupForm = true
+                HStack(spacing: 16) {
+                    Button("Create Group") {
+                        showCreateGroupForm = true
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    NavigationLink(destination: InvitationView()) {
+                        Text("View Invitations")
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                    }
                 }
                 .padding()
                 .buttonStyle(.borderedProminent)
