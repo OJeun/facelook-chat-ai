@@ -14,9 +14,12 @@ export async function saveMessagesToDB(
   
   // Map messages to replace `id` with `chatId`
   const mappedMessages = messages.map((msg) => ({
-    ...msg,
-    chatId: msg.id, // Replace `id` with `chatId`
-    id: undefined,  // Remove `id` field for compatibility
+    chatId: msg.id,
+    groupId: parseInt(msg.groupId),
+    senderId: msg.senderId,
+    senderName: msg.senderName,
+    message: msg.content,
+    createdAt: msg.createdAt,
   }));
 
   console.log("5. This is the messages that are being saved: ", mappedMessages);
@@ -72,7 +75,7 @@ export async function getMessagesFromDB(
         groupId: String(chat.groupId),    // Convert `groupId` to string
         senderId: chat.senderId,
         senderName: chat.senderName,
-        content: chat.message,            // Map `message` to `content`
+        content: chat.content,            // Map `message` to `content`
         createdAt: chat.createdAt,
       }));
     } else {
