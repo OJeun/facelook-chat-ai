@@ -95,17 +95,3 @@ export async function getRecentMessagesFromRedis(groupId: string) {
 export async function clearMessages(groupId: string) {
   await redisClient.del(`group:${groupId}:messages`);
 }
-
-export async function clearAllRedisData() {
-  try {
-    await redisClient.flushAll();
-    console.log("Successfully cleared all Redis data");
-  } catch (error) {
-    console.error("Failed to clear Redis data:", error);
-    throw error;
-  }
-}
-
-setTimeout(() => {
-  clearAllRedisData();
-}, 1000);
