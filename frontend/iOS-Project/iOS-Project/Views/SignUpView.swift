@@ -18,7 +18,7 @@ struct SignUpView: View {
             HeaderView(
                 title: "Register",
                 subtitle: "Sign up, Today!",
-                angle: 15,
+                angle: 30,
                 backColor: .blue
             )
             

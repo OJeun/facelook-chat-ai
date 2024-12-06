@@ -12,12 +12,11 @@ struct LoginView: View {
     let onLoginSuccess: (Int, String) -> Void
 
     var body: some View {
-        NavigationView {
             VStack(spacing: 10) {
                 HeaderView(
                     title: "Login",
                     subtitle: "Access your account",
-                    angle: 15,
+                    angle: 30,
                     backColor: .blue
                 )
 
@@ -75,7 +74,6 @@ struct LoginView: View {
             }
             .padding()
         }
-    }
 }
 
 #Preview {

@@ -18,7 +18,7 @@ struct HeaderView: View {
             RoundedRectangle(cornerRadius: 0)
                 .foregroundColor(backColor)
                 .rotationEffect(Angle(degrees: angle))
-                .frame(height:475)
+                .frame(height:600)
             
             VStack {
                 Image("facelook-white")
