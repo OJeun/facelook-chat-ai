@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ChatView: View {
     @ObservedObject var viewModel: ChatViewViewModel
+    @State private var showSendInvitationView = false
 
     var body: some View {
         VStack {
@@ -19,14 +20,21 @@ struct ChatView: View {
                     .foregroundColor(.primary)
                 Spacer()
                 Button(action: {
-                    // TODO: Add logic to send a chat invitation to users
-                    print("Add person to chat room")
+                    showSendInvitationView = true
                 }) {
                     Image(systemName: "plus")
                         .font(.title2)
                         .padding()
                         .background(Color.blue.opacity(0.1))
                         .clipShape(Circle())
+                }
+                .sheet(isPresented: $showSendInvitationView) {
+                    SendInvitationView(
+                        viewModel: SendInvitationViewViewModel(
+                            groupId: viewModel.groupId,
+                            currentUserId: Int(viewModel.currentUserId) ?? 0
+                        )
+                    )
                 }
             }
             .padding(.horizontal)
