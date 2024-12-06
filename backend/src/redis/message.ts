@@ -161,16 +161,19 @@ setInterval(async () => {
 
       // 等待所有分数查询完成
       const scores = (await Promise.all(scorePromises)).filter(
-        (score) => score !== null
+        (score) => score !== null && score.userId !== null
       );
 
       return {
         id: parseInt(groupId),
-        messages: messages.map((msg) => ({
-          message: msg.content,
-          userId: msg.senderId,
-          messageId: msg.id,
-        })),
+        // if userId is null, skip it
+        messages: messages
+          .filter((msg) => msg.senderId !== null)
+          .map((msg) => ({
+            message: msg.content,
+            userId: msg.senderId,
+            messageId: msg.id,
+          })),
         sentimentScores: scores,
       };
     });
