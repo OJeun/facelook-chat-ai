@@ -79,7 +79,7 @@ export function setupWebsocket(server: FastifyInstance) {
       for (const client of connectedClients[groupId]) {
         if (client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify({ type: "newMessage", message }));
-        }
+        } 
       }
     });
 
