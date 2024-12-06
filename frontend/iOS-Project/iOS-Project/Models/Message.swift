@@ -8,7 +8,7 @@
 import Foundation
 
 struct Message: Identifiable, Codable, Equatable {
-    let id: UUID
+    let id: String
     let content: String
     let senderId: String
     let senderName: String
@@ -24,4 +24,9 @@ struct Message: Identifiable, Codable, Equatable {
         }
         return createdAt
     }
+}
+
+struct WebSocketResponse: Decodable {
+    let type: String
+    let messages: [Message]?
 }

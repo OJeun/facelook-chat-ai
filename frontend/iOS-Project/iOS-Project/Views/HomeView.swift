@@ -92,7 +92,8 @@ struct HomeView: View {
                                 ChatView(viewModel: ChatViewViewModel(
                                     groupId: group.id, // Int for groupId
                                     currentUserId: "\(userID)",
-                                    currentUserName: userName
+                                    currentUserName: userName,
+                                    groupName: group.name
                                 ))
                             }
                         }

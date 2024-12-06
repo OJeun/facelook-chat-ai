@@ -11,11 +11,13 @@ class ChatViewViewModel: ObservableObject {
     let groupId: Int // Int for groupId when fetching groups
     let currentUserId: String
     let currentUserName: String
+    let groupName: String
 
-    init(groupId: Int, currentUserId: String, currentUserName: String) {
+    init(groupId: Int, currentUserId: String, currentUserName: String, groupName: String) {
         self.groupId = groupId
         self.currentUserId = currentUserId
         self.currentUserName = currentUserName
+        self.groupName = groupName
         connectWebSocket()
     }
 
@@ -25,7 +27,11 @@ class ChatViewViewModel: ObservableObject {
 
 
     func connectWebSocket() {
-
+        guard webSocketTask == nil else {
+            print("WebSocket already connected")
+            return
+        }
+        
         print("Query groupId: \(String(self.groupId))")
         guard let url = URL(string: "wss://ios-project.onrender.com/ws?groupId=\(String(self.groupId))") else {
             print("Invalid WebSocket URL")
@@ -36,6 +42,8 @@ class ChatViewViewModel: ObservableObject {
 
         receiveMessage()
     }
+
+
 
     func receiveMessage() {
         webSocketTask?.receive { [weak self] result in
@@ -48,9 +56,11 @@ class ChatViewViewModel: ObservableObject {
                 switch message {
                 case .string(let text):
                     if let data = text.data(using: .utf8),
-                       let receivedMessage = try? JSONDecoder().decode(Message.self, from: data) {
-                        DispatchQueue.main.async {
-                            self.messages.append(receivedMessage)
+                    let response = try? JSONDecoder().decode(WebSocketResponse.self, from: data) {
+                        if response.type == "recentMessages", let messages = response.messages {
+                            DispatchQueue.main.async {
+                                self.messages.append(contentsOf: messages)
+                            }
                         }
                     } else {
                         print("Failed to decode message: \(text)")
@@ -68,11 +78,11 @@ class ChatViewViewModel: ObservableObject {
         guard !newMessage.isEmpty else { return }
 
         let message = Message(
-            id: UUID(),
+            id: UUID().uuidString,
             content: newMessage,
             senderId: currentUserId,
             senderName: currentUserName,
-            groupId: String(groupId), // Convert groupId to String for sending
+            groupId: String(groupId), // Conv›Ωert groupId to String for sending
             createdAt: ISO8601DateFormatter().string(from: Date())
         )
 
