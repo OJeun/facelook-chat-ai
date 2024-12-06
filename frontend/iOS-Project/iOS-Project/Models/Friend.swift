@@ -20,21 +20,20 @@ struct Friend: Codable {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+
         if let id = try? container.decode(Int.self, forKey: .friendId) {
             self.friendId = id
         } else if let idString = try? container.decode(String.self, forKey: .friendId),
                   let id = Int(idString) {
             self.friendId = id
         } else {
-            self.friendId = nil
+            self.friendId = nil // Default to nil if decoding fails
         }
 
         self.name = try container.decode(String.self, forKey: .name)
         self.email = try container.decode(String.self, forKey: .email)
     }
 }
-
 
 struct FriendResponse: Codable {
     let friends: [Friend]

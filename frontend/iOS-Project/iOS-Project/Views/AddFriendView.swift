@@ -21,8 +21,9 @@ struct AddFriendView: View {
                 // Add Friend Form
                 TextField("Enter friend's email", text: $email)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .autocapitalization(.none)
                     .padding()
-
+                
                 Button(action: {
                     addFriendViewModel.sendFriendRequest(receiverEmail: email) { message in
                         responseMessage = message
@@ -51,44 +52,51 @@ struct AddFriendView: View {
                         }
                     )
                 }
-
+                
                 Divider()
                     .padding(.vertical)
-
+                
                 // Friend List View
-                if !friendListViewModel.errorMessage.isEmpty {
-                    Text(friendListViewModel.errorMessage)
-                        .foregroundColor(.red)
-                        .padding()
-                } else {
-                    List {
-                        ForEach(friendListViewModel.friends, id: \.friendId) { friend in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(friend.name)
-                                        .font(.headline)
-                                    Text("Email: \(friend.email)")
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
+                VStack{
+                    if !friendListViewModel.errorMessage.isEmpty {
+                        Text(friendListViewModel.errorMessage)
+                            .foregroundColor(.red)
+                            .padding()
+                    } else if friendListViewModel.friends.isEmpty {
+                        Text("No friends")
+                            .foregroundColor(.gray)
+                            .font(.headline)
+                            .padding()
+                    } else {
+                        // Display the list of friends
+                        List {
+                            ForEach(friendListViewModel.friends, id: \.friendId) { friend in
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text(friend.name)
+                                            .font(.headline)
+                                        Text("Email: \(friend.email)")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                    }
                                 }
+                                .padding(.vertical, 8)
                             }
-                            .padding(.vertical, 8)
+                            .onDelete(perform: deleteFriend)
                         }
-                        .onDelete(perform: deleteFriend)
+                        .listStyle(PlainListStyle())
                     }
-                    .listStyle(PlainListStyle())
                 }
+                
+                    .onAppear {
+                        friendListViewModel.fetchFriends()
+                    }
+                    .navigationTitle("Friends")
+                    .navigationBarItems(leading: Button(action: {
+                        dismiss()
+                    }) {
+                    })
             }
-            .onAppear {
-                friendListViewModel.fetchFriends()
-            }
-            .navigationTitle("Add Friend & Friends List")
-            .navigationBarItems(leading: Button(action: {
-                dismiss()
-            }) {
-                Text("Cancel")
-                    .foregroundColor(.red)
-            })
         }
     }
 

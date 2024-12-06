@@ -50,14 +50,12 @@ class FriendRequestsViewViewModel: ObservableObject {
             }
 
             do {
-                // Try to decode as an array of FriendRequest
                 if let requestResponse = try? JSONDecoder().decode([FriendRequest].self, from: data) {
                     DispatchQueue.main.async {
                         self.requests = requestResponse
                         self.errorMessage = ""
                     }
                 } else {
-                    // Fallback: Decode as an ErrorResponse
                     let errorResponse = try JSONDecoder().decode(ErrorResponse.self, from: data)
                     DispatchQueue.main.async {
                         self.requests = [] // Clear requests
