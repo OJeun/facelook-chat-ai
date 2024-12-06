@@ -7,43 +7,19 @@
 
 import SwiftUI
 
-// Align the UserGroup struct with the API response
-struct UserGroup: Identifiable, Codable {
-    let id: Int // Updated to Int for groupId
-    let name: String
-
-    enum CodingKeys: String, CodingKey {
-        case id = "groupId"
-        case name = "groupName"
-    }
-}
-
-struct GroupListResponse: Codable {
-    let groupList: [UserGroup]
-}
-
-struct CreateGroupResponse: Codable {
-    let message: String
-    let group: GroupDetails
-}
-
-struct GroupDetails: Codable {
-    let lastChatId: String? // Nullable field
-    let groupId: Int
-    let groupName: String
-}
-
 struct HomeView: View {
+    @ObservedObject var viewModel: HomeViewViewModel
     let userID: Int
-    let userName: String // Include user's name for displaying in ChatView
-    @State private var groups: [UserGroup] = []
-    @State private var isLoading: Bool = true
-    @State private var errorMessage: String? = nil
-    @State private var showCreateGroupForm = false
-    @State private var groupName = ""
-    @State private var selectedGroup: UserGroup?
-
+    let userName: String
+    
+    init(userID: Int, userName: String) {
+        self.userID = userID
+        self.userName = userName
+        _viewModel = ObservedObject(wrappedValue: HomeViewViewModel(userID: userID))
+    }
+    
     var body: some View {
+<<<<<<< HEAD
         NavigationStack {
             VStack {
                 // Top Navigation Bar
@@ -68,40 +44,57 @@ struct HomeView: View {
                 }
                 .padding(.vertical)
 
+=======
+        NavigationView {
+            VStack(spacing: 10) {
+                HeaderView(
+                    title: "Search",
+                    subtitle: "Find your groups",
+                    angle: 0,
+                    backColor: .blue,
+                    image: "logo"
+                )
+                SearchView()
+                
+>>>>>>> fiona_ui/ux
                 // Group Content
                 VStack {
-                    if isLoading {
+                    if viewModel.isLoading {
                         ProgressView()
-                    } else if let errorMessage = errorMessage {
+                    } else if let errorMessage = viewModel.errorMessage {
                         Text(errorMessage)
                             .foregroundColor(.red)
-                    } else if groups.isEmpty {
+                    } else if $viewModel.groups.isEmpty {
                         Text("You have no groups.")
                             .foregroundColor(.gray)
                             .font(.headline)
                     } else {
-                        List(groups) { group in
-                            Button(action: {
-                                selectedGroup = group
-                            }) {
-                                Text(group.name)
-                                    .font(.headline)
-                                    .padding(.vertical, 8)
+                        List(viewModel.groups) { group in
+                            GroupView(group: group) {
+                            viewModel.selectedGroup = group
                             }
-                            .sheet(item: $selectedGroup) { group in
+                            
+                            .sheet(item: $viewModel.selectedGroup) { group in
                                 ChatView(viewModel: ChatViewViewModel(
-                                    groupId: group.id, // Int for groupId
+                                    groupId: group.id,
                                     currentUserId: "\(userID)",
                                     currentUserName: userName,
                                     groupName: group.name
                                 ))
                             }
                         }
+                        .listStyle(PlainListStyle())
+                        .frame(maxHeight: 200)
                     }
                 }
-                .padding()
-
+                .frame(maxWidth: .infinity, maxHeight: 200)
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 2)
+                        .padding(.horizontal, 16)
+                
                 // Create Group Button
+<<<<<<< HEAD
                 HStack(spacing: 16) {
                     Button("Create Group") {
                         showCreateGroupForm = true
@@ -114,123 +107,35 @@ struct HomeView: View {
                             .foregroundColor(.white)
                             .cornerRadius(8)
                     }
+=======
+                Button("Create Group") {
+                    viewModel.showCreateGroupForm = true
+>>>>>>> fiona_ui/ux
                 }
                 .padding()
                 .buttonStyle(.borderedProminent)
-            }
-            .sheet(isPresented: $showCreateGroupForm) {
-                VStack {
-                    Text("Create a New Group")
-                        .font(.headline)
-                    TextField("Group Name", text: $groupName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                .sheet(isPresented: $viewModel.showCreateGroupForm) {
+                    VStack {
+                        Text("Create a New Group")
+                            .font(.headline)
+                        TextField("Group Name", text: $viewModel.groupName)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding()
+                        Button("Submit") {
+                            viewModel.createGroup()
+                        }
                         .padding()
-                    Button("Submit") {
-                        createGroup()
+                        .buttonStyle(.borderedProminent)
                     }
                     .padding()
-                    .buttonStyle(.borderedProminent)
-                }
-                .padding()
-            }
-            .onAppear {
-                fetchGroups()
-            }
-        }
-    }
-
-    // Fetch Groups Function
-    func fetchGroups() {
-        guard let url = URL(string: "https://ios-project.onrender.com/api/group/list/\(userID)") else {
-            errorMessage = "Invalid URL"
-            isLoading = false
-            return
-        }
-
-        guard let token = UserDefaults.standard.string(forKey: "authToken") else {
-            errorMessage = "No authorization token found. Please log in again."
-            isLoading = false
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    self.errorMessage = "Failed to load groups: \(error.localizedDescription)"
-                    self.isLoading = false
-                    return
-                }
-
-                guard let data = data else {
-                    self.errorMessage = "No data received"
-                    self.isLoading = false
-                    return
-                }
-
-                do {
-                    let decodedResponse = try JSONDecoder().decode(GroupListResponse.self, from: data)
-                    self.groups = decodedResponse.groupList
-                    self.isLoading = false
-                } catch {
-                    self.errorMessage = "Failed to decode groups: \(error.localizedDescription)"
-                    self.isLoading = false
                 }
             }
-        }.resume()
-    }
-
-    // Create Group Function
-    func createGroup() {
-        guard let url = URL(string: "https://ios-project.onrender.com/api/group/create") else {
-            errorMessage = "Invalid URL"
-            return
         }
-
-        guard let token = UserDefaults.standard.string(forKey: "authToken") else {
-            errorMessage = "No authorization token found. Please log in again."
-            return
-        }
-
-        let body: [String: Any] = [
-            "name": groupName,
-            "creatorId": userID
-        ]
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    self.errorMessage = "Failed to create group: \(error.localizedDescription)"
-                    return
-                }
-
-                guard let data = data else {
-                    self.errorMessage = "No data received"
-                    return
-                }
-
-                do {
-                    let decodedResponse = try JSONDecoder().decode(CreateGroupResponse.self, from: data)
-                    print("Group created successfully: \(decodedResponse)")
-                    fetchGroups() // Refresh groups
-                    showCreateGroupForm = false
-                } catch {
-                    self.errorMessage = "Failed to decode response: \(error.localizedDescription)"
-                }
-            }
-        }.resume()
     }
 }
+
 
 #Preview {
-    HomeView(userID: 22, userName: "Aric Or")
+    HomeView( userID: 22, userName: "Aric Or")
 }
+

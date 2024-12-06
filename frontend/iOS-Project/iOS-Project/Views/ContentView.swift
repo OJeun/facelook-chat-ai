@@ -32,14 +32,16 @@ struct ContentView: View {
                 viewModel.checkLoginStatus()
             }
         } else {
-            LoginView(onLoginSuccess: { userID, userName in
-                print("Login successful with userID: \(userID), userName: \(userName)")
-                viewModel.isLoggedIn = true
-                viewModel.userID = userID
-                viewModel.userName = userName
-                UserDefaults.standard.set(userID, forKey: "userID")
-                UserDefaults.standard.set(userName, forKey: "userName")
-            })
+            NavigationView {
+                LoginView(onLoginSuccess: { userID, userName in
+                    print("Login successful with userID: \(userID), userName: \(userName)")
+                    viewModel.isLoggedIn = true
+                    viewModel.userID = userID
+                    viewModel.userName = userName
+                    UserDefaults.standard.set(userID, forKey: "userID")
+                    UserDefaults.standard.set(userName, forKey: "userName")
+                })
+            }
         }
     }
 }
