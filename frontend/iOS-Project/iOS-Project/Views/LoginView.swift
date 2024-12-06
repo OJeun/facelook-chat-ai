@@ -9,11 +9,12 @@ import SwiftUI
 
 struct LoginView: View {
     @StateObject private var viewModel = LoginViewViewModel()
-    let onLoginSuccess: (Int, String) -> Void // Updated to return both userID and userName
+    let onLoginSuccess: (Int, String) -> Void
 
     var body: some View {
-        NavigationView { // Wrap the entire view in a NavigationView
-            VStack {
+        NavigationView {
+            VStack(spacing: 20) {
+                // Header section
                 HeaderView(
                     title: "Login",
                     subtitle: "Access your account",
@@ -21,37 +22,57 @@ struct LoginView: View {
                     backColor: .blue
                 )
 
-                Form {
-                    if !viewModel.errorMessage.isEmpty {
-                        Text(viewModel.errorMessage)
-                            .foregroundColor(.red)
-                    }
+                // Form
+                ZStack {
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(Color(UIColor.systemGray6))
+                        .frame(maxWidth: 350, minHeight: 200)
+                        .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 3)
 
-                    TextField("Email", text: $viewModel.email)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .autocapitalization(.none)
-                        .autocorrectionDisabled()
-
-                    SecureField("Password", text: $viewModel.password)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                    Button("Log In") {
-                        viewModel.login { userID, userName in
-                            onLoginSuccess(userID, userName)
+                    VStack(alignment: .leading, spacing: 15) {
+                        if !viewModel.errorMessage.isEmpty {
+                            Text(viewModel.errorMessage)
+                                .foregroundColor(.red)
                         }
+                        
+                        // Email input
+                        TextField("Email", text: $viewModel.email)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .autocapitalization(.none)
+                            .autocorrectionDisabled()
+                            .frame(maxWidth: 300)
+                        
+                        // Password input
+                        SecureField("Password", text: $viewModel.password)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .frame(maxWidth: 300)
+                        
+                        // Login button
+                        Button("Log In") {
+                            viewModel.login { userID, userName in
+                                onLoginSuccess(userID, userName)
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .frame(maxWidth: 300)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
+                    .frame(maxWidth: .infinity)
                 }
 
-                // Add NavigationLink for Sign-Up
-                NavigationLink(destination: SignUpView(onSignUpSuccess: { userID, userName, email in
-                    print("Sign Up successful! User ID: \(userID), User Name: \(userName), Email: \(email)")
-                })) {
-                    Text("New User?")
-                        .foregroundColor(.blue)
+                // Sign-up prompt
+                VStack {
+                    Text("Don't have an account?")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    
+                    NavigationLink(destination: SignUpView(onSignUpSuccess: { userID, userName, email in
+                        print("Sign Up successful! User ID: \(userID), User Name: \(userName), Email: \(email)")
+                    })) {
+                        Text("Sign Up")
+                            .foregroundColor(.blue)
+                            .fontWeight(.bold)
+                    }
                 }
-                .padding(.top)
 
                 Spacer()
             }
