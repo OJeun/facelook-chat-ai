@@ -78,13 +78,13 @@ class ChatViewViewModel: ObservableObject {
         case .string(let text):
             if let data = text.data(using: .utf8),
                let response = try? JSONDecoder().decode(WebSocketResponse.self, from: data) {
-                DispatchQueue.main.async { [weak self] in
-                    guard let self = self else { return }
-                    
-                    switch response.type {
-                    case "recentMessages":
-                        if let messages = response.messages {
-                            self.messages.append(contentsOf: messages)
+                if response.type == "recentMessages", let messages = response.messages {
+                    DispatchQueue.main.async {
+                        self.messages.append(contentsOf: messages)
+                    }
+                } else if response.type == "newMessage", let messages = response.messages, let newMessage = messages.first {
+                    DispatchQueue.main.async {
+                        if !self.messages.contains(where: { $0.id == newMessage.id }) {
                         }
                     case "newMessage":
                         if let messages = response.messages, let newMessage = messages.first {

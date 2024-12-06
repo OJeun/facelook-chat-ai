@@ -207,6 +207,13 @@ setInterval(async () => {
 
       AiResults.forEach(async (result) => {
         const groupId = result.chatId;
+
+        console.log(
+          "sending to group",
+          groupId,
+          "result.emojis",
+          result.emojis
+        );
         // broadcast emoji first
         if (connectedClients[groupId]) {
           const formattedEmojis = result.emojis.map((emojiResult) => ({
