@@ -22,7 +22,7 @@ struct ChatView: View {
                 Button(action: {
                     showSendInvitationView = true
                 }) {
-                    Image(systemName: "plus")
+                    Image(systemName: "person.badge.plus")
                         .font(.title2)
                         .padding()
                         .background(Color.blue.opacity(0.1))
