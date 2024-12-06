@@ -152,7 +152,7 @@ export async function friendRoutes(fastify: FastifyInstance) {
                   userId: { type: "number" },
                   name: { type: "string" },
                   email: { type: "string" },
-                  acheivementPoint: { type: "number" },
+                  achievementPoint: { type: "number" },
                 },
               },
             },
@@ -164,6 +164,46 @@ export async function friendRoutes(fastify: FastifyInstance) {
       try {
         const response = await axios.get(
           process.env.DB_API_URL + `api/user/${request.params.userId}`
+        );
+        return response.data;
+      } catch (error) {
+        errorHandler(error, reply);
+      }
+    }
+  );
+
+  fastify.get(
+    "/user/achievementPoint",
+    {
+      schema: {
+        tags: ["friend"],
+        description: "Get user's achievement point",
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              users: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    userId: { type: "number" },
+                    name: { type: "string" },
+                    email: { type: "string" },
+                    achievementPoint: { type: "number" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    async (_, reply) => {
+      try {
+        const response = await axios.get(
+          process.env.DB_API_URL + "api/user/achivementPoint"
         );
         return response.data;
       } catch (error) {

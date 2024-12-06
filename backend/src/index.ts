@@ -14,6 +14,7 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { setupWebsocket } from "./sockets/websocket";
 import { initializeRedis } from "./redis/client";
+import { friendRequestRoutes } from "./routes/friendRequest";
 
 //add websocket
 
@@ -75,12 +76,12 @@ server.register(require("@fastify/cors"), {
 // register plugins
 server.register(require("@fastify/formbody"));
 
-
 server.register(authRoutes, { prefix: "/api" });
 server.register(friendRoutes, { prefix: "/api" });
 server.register(groupRoutes, { prefix: "/api" });
 server.register(invitationRoutes, { prefix: "/api" });
 server.register(chatRoutes, { prefix: "/api" });
+server.register(friendRequestRoutes, { prefix: "/api" });
 
 const verifyToken = async (request: FastifyRequest) => {
   try {
@@ -117,7 +118,7 @@ server.addHook("preHandler", async (request) => {
     "/ws",
   ];
 
-  const cleanUrl = request.url.split("?")[0]; 
+  const cleanUrl = request.url.split("?")[0];
 
   if (
     excludedPaths.includes(cleanUrl) ||
