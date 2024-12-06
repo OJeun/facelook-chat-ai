@@ -61,4 +61,12 @@ class ProfileViewViewModel: ObservableObject {
             }
         }.resume()
     }
+    
+    func logout() {
+            // Clear stored data
+            UserDefaults.standard.removeObject(forKey: "authToken")
+            UserDefaults.standard.removeObject(forKey: "userID")
+            UserDefaults.standard.removeObject(forKey: "userName")
+        }
+
 }

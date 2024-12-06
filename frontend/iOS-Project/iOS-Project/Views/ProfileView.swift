@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewViewModel()
+    @Binding var isLoggedIn: Bool
 
     var body: some View {
         NavigationView {
@@ -72,6 +73,21 @@ struct ProfileView: View {
                 .padding(.horizontal)
                 
                 Text("References").font(Font.system(size: 25, weight: .bold))
+                
+                Spacer()
+
+                // Logout Button
+                Button(action: {
+                    viewModel.logout()
+                    isLoggedIn = false
+                }) {
+                    Text("Logout")
+                        .frame(maxWidth: .infinity, maxHeight: 50)
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                }
             }
             .padding()
             .onAppear {
@@ -82,5 +98,5 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView()
+    ProfileView(isLoggedIn: .constant(true))
 }
