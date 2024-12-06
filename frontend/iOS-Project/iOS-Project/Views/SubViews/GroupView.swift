@@ -15,7 +15,7 @@ struct GroupView: View {
         Button(action: onGroupSelected) {
             Text(group.name)
                 .font(.headline)
-                .padding(.vertical, 20)
+                .padding(.vertical, 10)
         }
     }
 }

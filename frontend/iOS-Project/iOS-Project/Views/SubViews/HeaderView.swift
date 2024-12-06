@@ -25,7 +25,7 @@ struct HeaderView: View {
                 Image(image)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 250, height: 250)
+                    .frame(width: 200, height: 200)
                     .padding(.top,40)
                     
                 Text(title)

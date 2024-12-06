@@ -46,6 +46,7 @@ struct HomeView: View {
                             GroupView(group: group) {
                             viewModel.selectedGroup = group
                             }
+                            
                             .sheet(item: $viewModel.selectedGroup) { group in
                                 ChatView(viewModel: ChatViewViewModel(
                                     groupId: group.id,
@@ -55,10 +56,16 @@ struct HomeView: View {
                                 ))
                             }
                         }
+                        .listStyle(PlainListStyle())
+                        .frame(maxHeight: 200)
                     }
                 }
-                .padding()
-
+                .frame(maxWidth: .infinity, maxHeight: 200)
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 2)
+                        .padding(.horizontal, 16)
+                
                 // Create Group Button
                 Button("Create Group") {
                     viewModel.showCreateGroupForm = true
