@@ -88,8 +88,6 @@ export async function getRecentMessagesFromRedis(groupId: string) {
 
       return {
         ...parsedMessage,
-        message: parsedMessage.content, 
-        content: undefined,
       };
     });
   }
