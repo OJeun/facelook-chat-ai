@@ -26,7 +26,7 @@ struct SignUpView: View {
                 // Background RoundedRectangle
                 RoundedRectangle(cornerRadius: 15)
                     .fill(Color(UIColor.systemGray6))
-                    .frame(maxWidth: 350, minHeight: 200)
+                    .frame(maxWidth: 350, maxHeight: 300)
                     .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 3)
 
                 VStack(alignment: .leading, spacing: 15) {
@@ -62,11 +62,26 @@ struct SignUpView: View {
                         }
                     }
                     .buttonStyle(.borderedProminent)
+                    .frame(maxWidth: 300)
+                    
+                    // Login
+                    HStack {
+                        Text("Already have an account?")
+                            .foregroundColor(.gray)
+                        
+                        NavigationLink(destination: LoginView(onLoginSuccess: { userID, userName in
+                            print("Login successful! User ID: \(userID), User Name: \(userName)")
+                            })) {
+                            Text("Login")
+                                .foregroundColor(.blue)
+                                .fontWeight(.bold)
+                        }
+                    }
+                
+                    
                 }
                 .frame(maxWidth: .infinity)
-                .padding()
             }
-
             Spacer()
         }
         .padding()
