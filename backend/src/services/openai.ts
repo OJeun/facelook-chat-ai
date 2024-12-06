@@ -197,8 +197,8 @@ const getEmojisWithMessageId = (
   });
 };
 
-async function analyzeAllChats(chats: Chat[]) {
-  const results: AnalysisResult[] = [];
+async function analyzeAllChats(chats: Chat[]): Promise<FullAnalysisResult[]> {
+  const results: FullAnalysisResult[] = [];
 
   for (const chat of chats) {
     let retryCount = 0;
@@ -210,14 +210,12 @@ async function analyzeAllChats(chats: Chat[]) {
         const result = await analyzeChatSentiment(chat);
         const emojiResult = await generateEmoji(chat);
 
-        const fullResult: FullAnalysisResult = {
-          ...result,
-          emojis: emojiResult,
-        };
-
         const emojisWithMessageId: EmojiWithMessageId[] = [];
         getEmojisWithMessageId(emojiResult, chat, emojisWithMessageId);
-        fullResult.emojis = emojisWithMessageId;
+        const fullResult: FullAnalysisResult = {
+          ...result,
+          emojis: emojisWithMessageId,
+        };
         console.log("fullResult: ", fullResult);
         results.push(fullResult);
         console.log(`analysis complete - chatId: ${chat.id}`);

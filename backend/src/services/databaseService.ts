@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import { redisMessageWithTimeStamp } from "../models/chat";
+import axios from "axios";
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ export async function saveMessagesToDB(
     `4. Saving ${messages.length} messages for group ${groupId} to MySQL.`
   );
   const db_api_url = process.env.DB_API_URL + "api/chat/saveChats";
-  
+
   console.log("5. This is the messages that are being saved: ", messages);
 
   const response = await fetch(db_api_url, {
@@ -60,19 +61,44 @@ export async function getMessagesFromDB(
 
     if (jsonResponse && Array.isArray(jsonResponse.chats)) {
       return jsonResponse.chats.map((chat: redisMessageWithTimeStamp) => ({
-        id: String(chat.chatId),          
-        groupId: String(chat.groupId),    // Convert `groupId` to string
+        id: String(chat.chatId),
+        groupId: String(chat.groupId), // Convert `groupId` to string
         senderId: chat.senderId,
         senderName: chat.senderName,
-        content: chat.message,            // Map `message` to `content`
+        content: chat.message, // Map `message` to `content`
         createdAt: chat.createdAt,
       }));
     } else {
-      console.error("Unexpected API response structure. Returning empty array.");
+      console.error(
+        "Unexpected API response structure. Returning empty array."
+      );
       return [];
     }
   } catch (error) {
     console.error("Error while fetching messages from MySQL:", error);
     return [];
+  }
+}
+
+// add a db service to get data from select or insert query from db
+export async function sendQueryToDB(query: string) {
+  const db_api_url = process.env.DB_API_URL + "api/query";
+
+  try {
+    const response = await axios.get(db_api_url, {
+      params: {
+        sql: query,
+      },
+    });
+
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      console.error("Query failed:", response.statusText);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error executing query:", error);
+    return null;
   }
 }

@@ -11,7 +11,6 @@ interface redisMessageWithTimeStamp extends redisMessage {
   createdAt: string;
 }
 
-
 interface Message {
   message: string;
   userId: string;
@@ -47,7 +46,7 @@ interface AnalysisResult {
 }
 
 interface FullAnalysisResult extends AnalysisResult {
-  emojis: EmojiGenerationResult[];
+  emojis: EmojiWithMessageId[];
 }
 
 interface AddAchievementScore {
@@ -64,6 +63,12 @@ interface EmojiWithMessageId extends EmojiGenerationResult {
   messageId: string;
 }
 
+interface AiAnalysisResult {
+  chatId: string;
+  analysisResult: FullAnalysisResult;
+  timestamp: string; // Timestamp when the analysis was performed
+}
+
 export {
   Chat,
   redisMessage,
@@ -76,4 +81,5 @@ export {
   UserSentimentScore,
   AiResult,
   redisMessageWithTimeStamp,
+  AiAnalysisResult,
 };

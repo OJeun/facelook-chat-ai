@@ -15,6 +15,10 @@ import swaggerUi from "@fastify/swagger-ui";
 import { setupWebsocket } from "./sockets/websocket";
 import { initializeRedis } from "./redis/client";
 import { friendRequestRoutes } from "./routes/friendRequest";
+import { analyzeAllChats } from "./services/openai";
+import { chatOne } from "./constants/testData";
+
+console.log(analyzeAllChats([chatOne]));
 
 //add websocket
 
