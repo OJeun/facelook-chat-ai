@@ -12,6 +12,7 @@ struct WebSocketResponse: Codable {
     let type: String
     let messages: [Message]?
     let emojis: [EmojiResponse]?
+    let emoji: String?
 }
 
 class ChatViewViewModel: ObservableObject {
@@ -62,12 +63,13 @@ class ChatViewViewModel: ObservableObject {
             switch result {
             case .failure(let error):
                 print("WebSocket error: \(error.localizedDescription)")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    self.connectWebSocket()
+                }
             case .success(let message):
                 self.handleWebSocketMessage(message)
+                self.receiveMessage()
             }
-            
-            // Continue listening for the next message
-            self.receiveMessage()
         }
     }
     
@@ -105,17 +107,19 @@ class ChatViewViewModel: ObservableObject {
     }
     
     private func updateMessagesWithEmojis(_ emojis: [EmojiResponse]) {
-        var updatedMessages = self.messages
-        
-        for emoji in emojis {
-            if let index = updatedMessages.firstIndex(where: { $0.id == emoji.messageId }) {
-                updatedMessages[index].emoji = emoji.emoji
-            } else {
-                print("Warning: Message not found for emoji: \(emoji)")
+        DispatchQueue.main.async {
+            var updatedMessages = self.messages
+            
+            for emoji in emojis {
+                if let index = updatedMessages.firstIndex(where: { $0.id == emoji.messageId }) {
+                    var message = updatedMessages[index]
+                    message.emoji = emoji.emoji
+                    updatedMessages[index] = message
+                }
             }
+            
+            self.messages = updatedMessages
         }
-        
-        self.messages = updatedMessages
     }
     
     func sendMessage() {
@@ -143,5 +147,21 @@ class ChatViewViewModel: ObservableObject {
            // self.messages.append(message)
             // self.newMessage = ""
         // }
+    }
+    
+    func addEmoji(_ emoji: String, toMessageId messageId: String) {
+        let emojiResponse = EmojiResponse(
+            emoji: emoji,
+            userId: currentUserId,
+            messageId: messageId
+        )
+        
+        if let data = try? JSONEncoder().encode(emojiResponse) {
+            webSocketTask?.send(.data(data)) { error in
+                if let error = error {
+                    print("Failed to send emoji: \(error)")
+                }
+            }
+        }
     }
 }
