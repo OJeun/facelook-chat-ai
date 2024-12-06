@@ -58,6 +58,9 @@ struct ChatView: View {
         }
         .navigationTitle("Chat")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            viewModel.addEmojisToMessages() // Call the function on appear
+        }
     }
 
     private var messageList: some View {
@@ -88,10 +91,21 @@ struct MessageRow: View {
             if isCurrentUser {
                 Spacer()
                 VStack(alignment: .trailing) {
-                    Text(message.content)
-                        .padding()
-                        .background(Color.blue.opacity(0.2))
-                        .cornerRadius(10)
+                    ZStack(alignment: .bottomTrailing) {
+                        Text(message.content)
+                            .padding()
+                            .background(Color.blue.opacity(0.2))
+                            .cornerRadius(10)
+
+                        if let emoji = message.emoji {
+                            Text(emoji)
+                                .font(.title3)
+                                .padding(4)
+                                .background(Color.white.opacity(0.8))
+                                .clipShape(Circle())
+                                .offset(x: 5, y: 5)
+                        }
+                    }
                     Text(message.formattedTimestamp)
                         .font(.caption)
                         .foregroundColor(.gray)
@@ -101,10 +115,21 @@ struct MessageRow: View {
                     Text(message.senderName)
                         .font(.caption)
                         .foregroundColor(.gray)
-                    Text(message.content)
-                        .padding()
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(10)
+                    ZStack(alignment: .bottomTrailing) {
+                        Text(message.content)
+                            .padding()
+                            .background(Color.gray.opacity(0.2))
+                            .cornerRadius(10)
+
+                        if let emoji = message.emoji {
+                            Text(emoji)
+                                .font(.title3)
+                                .padding(4)
+                                .background(Color.white.opacity(0.8))
+                                .clipShape(Circle())
+                                .offset(x: 5, y: 5)
+                        }
+                    }
                     Text(message.formattedTimestamp)
                         .font(.caption)
                         .foregroundColor(.gray)

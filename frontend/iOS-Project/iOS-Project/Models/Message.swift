@@ -14,6 +14,7 @@ struct Message: Identifiable, Codable, Equatable {
     let senderName: String
     let groupId: String
     let createdAt: String
+    var emoji: String?
 
     var formattedTimestamp: String {
         let isoDateFormatter = ISO8601DateFormatter()

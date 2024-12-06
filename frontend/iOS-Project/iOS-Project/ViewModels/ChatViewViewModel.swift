@@ -107,4 +107,22 @@ class ChatViewViewModel: ObservableObject {
             // self.newMessage = ""
         // }
     }
+    
+    func addEmojisToMessages() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
+            guard let self = self else { return }
+
+            // Example emojis to assign
+            let emojis = ["😊", "😋", "😄", "🤔", "😍", "😢", "😡", "😎", "🥳"]
+            var updatedMessages = self.messages
+
+            // Assign emojis randomly to the messages
+            for i in 0..<updatedMessages.count {
+                let randomEmoji = emojis.randomElement() ?? "😃"
+                updatedMessages[i].emoji = randomEmoji
+            }
+
+            self.messages = updatedMessages
+        }
+    }
 }
