@@ -70,7 +70,6 @@ class ChatViewViewModel: ObservableObject {
                 } else if response.type == "newMessage", let messages = response.messages, let newMessage = messages.first {
                     DispatchQueue.main.async {
                         if !self.messages.contains(where: { $0.id == newMessage.id }) {
-                            self.messages.append(newMessage)
                         }
                     }
                 }
