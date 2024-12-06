@@ -47,6 +47,7 @@ export async function getRecentMessages(
     numberOfMessagesFromDb
   );
 
+
   const lengthOfMessagesFromDb = messagesFromDb.length;
 
   if (lengthOfMessagesFromDb === 0) {

@@ -9,9 +9,39 @@ import SwiftUI
 
 struct ChatView: View {
     @ObservedObject var viewModel: ChatViewViewModel
+    @State private var showSendInvitationView = false
 
     var body: some View {
         VStack {
+            // Header with Chat Title and Add Button
+            HStack {
+                Text(viewModel.groupName)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                Spacer()
+                Button(action: {
+                    showSendInvitationView = true
+                }) {
+                    Image(systemName: "plus")
+                        .font(.title2)
+                        .padding()
+                        .background(Color.blue.opacity(0.1))
+                        .clipShape(Circle())
+                }
+                .sheet(isPresented: $showSendInvitationView) {
+                    SendInvitationView(
+                        viewModel: SendInvitationViewViewModel(
+                            groupId: viewModel.groupId,
+                            currentUserId: Int(viewModel.currentUserId) ?? 0
+                        )
+                    )
+                }
+            }
+            .padding(.horizontal)
+            .padding(.top, 10)
+
+            Divider()
+
             // Message List
             messageList
 
@@ -34,7 +64,7 @@ struct ChatView: View {
         ScrollView {
             ScrollViewReader { proxy in
                 VStack(spacing: 12) {
-                    ForEach(viewModel.messages) { message in
+                    ForEach(viewModel.messages.reversed()) { message in
                         MessageRow(message: message, isCurrentUser: message.senderId == viewModel.currentUserId)
                             .id(message.id)
                     }
@@ -90,6 +120,7 @@ struct MessageRow: View {
     ChatView(viewModel: ChatViewViewModel(
         groupId: 1, // Int for fetching the group
         currentUserId: "22",
-        currentUserName: "Aric Or"
+        currentUserName: "Aric Or",
+        groupName: "SAMPLE CHAT"
     ))
 }

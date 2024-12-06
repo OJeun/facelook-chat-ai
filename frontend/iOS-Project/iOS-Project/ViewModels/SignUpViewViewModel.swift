@@ -1,36 +1,36 @@
 //
-//  LoginViewViewModel.swift
+//  SignUpViewViewModel.swift
 //  iOS-Project
 //
-//  Created by Aric Or on 2024-11-30.
+//  Created by Diane Choi on 2024-12-05.
 //
 
 import Foundation
-import SwiftUI
 import Combine
 
-class LoginViewViewModel: ObservableObject {
+class SignUpViewViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
+    @Published var name: String = ""
     @Published var errorMessage: String = ""
-    @Published var token: String? = nil
     @Published var userId: Int? = nil
-
+    
     private var cancellables = Set<AnyCancellable>()
 
-    func login(onSuccess: @escaping (Int, String) -> Void) {
+    func signUp(onSuccess: @escaping (Int, String, String) -> Void) {
         errorMessage = ""
 
         guard validateInput() else { return }
 
-        let url = URL(string: "https://ios-project.onrender.com/api/auth/login")!
+        let url = URL(string: "https://ios-project.onrender.com/api/auth/register")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let body: [String: String] = [
             "email": email,
-            "password": password
+            "password": password,
+            "name": name
         ]
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
@@ -46,12 +46,12 @@ class LoginViewViewModel: ObservableObject {
             .sink(receiveCompletion: { [weak self] completion in
                 switch completion {
                 case .failure(let error):
-                    self?.errorMessage = "Login failed: \(error.localizedDescription)"
+                    self?.errorMessage = "Register failed: \(error.localizedDescription)"
                 case .finished:
                     break
                 }
             }, receiveValue: { [weak self] response in
-                self?.handleSuccessfulLogin(response: response, onSuccess: onSuccess)
+                self?.handleSuccessfulSignUp(response: response, onSuccess: onSuccess)
             })
             .store(in: &cancellables)
     }
@@ -70,31 +70,15 @@ class LoginViewViewModel: ObservableObject {
         return true
     }
 
-    private func handleSuccessfulLogin(response: LoginResponse, onSuccess: @escaping (Int, String) -> Void) {
-        // Store the token and userId
-        self.token = response.token
-        self.userId = response.user.userId
+    private func handleSuccessfulSignUp(response: LoginResponse, onSuccess: @escaping (Int, String, String) -> Void) {
+        onSuccess(response.user.userId, response.user.name, response.user.email)
 
-        // Save the token, userId, and optionally userName for future use
-        UserDefaults.standard.set(response.token, forKey: "authToken")
-        UserDefaults.standard.set(response.user.userId, forKey: "userID")
-        UserDefaults.standard.set(response.user.name, forKey: "userName")
-
-        // Notify via callback with userId and userName
-        onSuccess(response.user.userId, response.user.name)
-
-        print("Login successful!")
+        print("Register successful!")
         print("User Details:")
         print("  UserID: \(response.user.userId)")
         print("  Name: \(response.user.name)")
-        print("  Achievement Points: \(response.user.achievementPoint)")
-        print("  Token: \(response.token!)")
+        print("  Email: \(response.user.email)")
+        
     }
 
-    static func getAuthorizationHeader() -> [String: String]? {
-        guard let token = UserDefaults.standard.string(forKey: "authToken") else {
-            return nil
-        }
-        return ["Authorization": "Bearer \(token)"]
-    }
 }
