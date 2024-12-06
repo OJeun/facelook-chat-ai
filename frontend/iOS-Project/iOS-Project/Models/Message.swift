@@ -16,13 +16,14 @@ struct Message: Identifiable, Codable, Equatable {
     let createdAt: String
 
     var formattedTimestamp: String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        formatter.dateStyle = .short
-        if let date = ISO8601DateFormatter().date(from: createdAt) {
-            return formatter.string(from: date)
+        let isoDateFormatter = ISO8601DateFormatter()
+        guard let date = isoDateFormatter.date(from: createdAt) else {
+            return createdAt // Fallback to original string if parsing fails
         }
-        return createdAt
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "hh:mm a, MMM d, yyyy" // 12-hour format with AM/PM
+        return dateFormatter.string(from: date)
     }
 }
 

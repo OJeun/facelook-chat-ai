@@ -19,7 +19,6 @@ struct ChatView: View {
                     .foregroundColor(.primary)
                 Spacer()
                 Button(action: {
-                    // TODO: Add logic to send a chat invitation to users
                     print("Add person to chat room")
                 }) {
                     Image(systemName: "plus")
@@ -52,18 +51,46 @@ struct ChatView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
+//    private var messageList: some View {
+//        ScrollView {
+//            ScrollViewReader { proxy in
+//                VStack(spacing: 12) {
+//                    // Display the messages in reverse order for correct chronological display
+//                    ForEach(Array(viewModel.messages.reversed().enumerated()), id: \.offset) { index, message in
+//                        MessageRow(message: message, isCurrentUser: message.senderId == viewModel.currentUserId)
+//                            .id(message.id) // This remains for animation purposes
+//                    }
+//                }
+//                .onChange(of: viewModel.messages) { _, newMessages in
+//                    if let lastMessage = newMessages.last {
+//                        // Scroll to the bottom to show the most recent message
+//                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
+//                    }
+//                }
+//            }
+//        }
+//    }
     private var messageList: some View {
         ScrollView {
             ScrollViewReader { proxy in
                 VStack(spacing: 12) {
-                    ForEach(viewModel.messages.reversed()) { message in
+                    ForEach(viewModel.messages.reversed(), id: \.id) { message in
                         MessageRow(message: message, isCurrentUser: message.senderId == viewModel.currentUserId)
-                            .id(message.id)
+                    }
+                }
+                .onAppear {
+                    if let lastMessage = viewModel.messages.last {
+                        print(lastMessage.content)
+                        DispatchQueue.main.async {
+                            proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                        }
                     }
                 }
                 .onChange(of: viewModel.messages) { _, newMessages in
                     if let lastMessage = newMessages.last {
-                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                        DispatchQueue.main.async {
+                            proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                        }
                     }
                 }
             }
