@@ -12,7 +12,14 @@ export async function saveMessagesToDB(
   );
   const db_api_url = process.env.DB_API_URL + "api/chat/saveChats";
   
-  console.log("5. This is the messages that are being saved: ", messages);
+  // Map messages to replace `id` with `chatId`
+  const mappedMessages = messages.map((msg) => ({
+    ...msg,
+    chatId: msg.id, // Replace `id` with `chatId`
+    id: undefined,  // Remove `id` field for compatibility
+  }));
+
+  console.log("5. This is the messages that are being saved: ", mappedMessages);
 
   const response = await fetch(db_api_url, {
     method: "POST",
@@ -20,7 +27,7 @@ export async function saveMessagesToDB(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      chatList: messages,
+      chatList: mappedMessages,
     }),
   });
 
@@ -29,6 +36,7 @@ export async function saveMessagesToDB(
     return;
   }
 }
+
 
 export async function getMessagesFromDB(
   groupId: string,
@@ -60,7 +68,7 @@ export async function getMessagesFromDB(
 
     if (jsonResponse && Array.isArray(jsonResponse.chats)) {
       return jsonResponse.chats.map((chat: redisMessageWithTimeStamp) => ({
-        id: String(chat.chatId),          
+        id: String(chat.id),          
         groupId: String(chat.groupId),    // Convert `groupId` to string
         senderId: chat.senderId,
         senderName: chat.senderName,

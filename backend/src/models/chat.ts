@@ -1,6 +1,6 @@
 // Define the structure for individual messages
 interface redisMessage {
-  chatId: string;
+  id: string;
   groupId: string;
   senderId: string;
   senderName: string;

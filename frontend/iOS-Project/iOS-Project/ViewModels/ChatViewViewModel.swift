@@ -80,7 +80,7 @@ class ChatViewViewModel: ObservableObject {
             content: newMessage,
             senderId: currentUserId,
             senderName: currentUserName,
-            groupId: String(groupId), // Convert groupId to String for sending
+            groupId: String(groupId), // Conv›Ωert groupId to String for sending
             createdAt: ISO8601DateFormatter().string(from: Date())
         )
 
