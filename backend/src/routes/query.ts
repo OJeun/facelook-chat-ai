@@ -22,16 +22,6 @@ export async function queryRoutes(fastify: FastifyInstance) {
           required: ["query"],
           properties: {
             query: { type: "string" },
-            params: {
-              type: "array",
-              items: {
-                anyOf: [
-                  { type: "string" },
-                  { type: "number" },
-                  { type: "null" },
-                ],
-              },
-            },
           },
         },
         response: {
