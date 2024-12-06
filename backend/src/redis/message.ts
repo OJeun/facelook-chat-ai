@@ -47,17 +47,8 @@ export async function getRecentMessages(
     numberOfMessagesFromDb
   );
 
-  // reformat the messages from DB
-  const formattedMessagesFromDb = messagesFromDb.map((msg) => ({
-    id: msg.id,
-    groupId: String(msg.groupId),
-    senderId: msg.senderId,
-    senderName: msg.senderName,
-    content: msg.content,
-    createdAt: msg.createdAt,
-  }));
 
-  const lengthOfMessagesFromDb = formattedMessagesFromDb.length;
+  const lengthOfMessagesFromDb = messagesFromDb.length;
 
   if (lengthOfMessagesFromDb === 0) {
     console.log(`No messages found in DB for group ${groupId}`);
@@ -72,7 +63,7 @@ export async function getRecentMessages(
 
   const allMessages = [
     ...messagesFromRedis.map((msg: any) => JSON.parse(msg)),
-    ...formattedMessagesFromDb
+    ...messagesFromDb
   ];
 
   console.log(

@@ -11,6 +11,14 @@ interface redisMessageWithTimeStamp extends redisMessage {
   createdAt: string;
 }
 
+interface messagesFromDB {
+  chatId: string;
+  groupId: number;
+  senderId: string;
+  senderName: string;
+  message: string;
+  createdAt: Date;
+}
 
 interface Message {
   message: string;
@@ -76,4 +84,5 @@ export {
   UserSentimentScore,
   AiResult,
   redisMessageWithTimeStamp,
+  messagesFromDB,
 };

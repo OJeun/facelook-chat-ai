@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { redisMessageWithTimeStamp } from "../models/chat";
+import { redisMessageWithTimeStamp, messagesFromDB } from "../models/chat";
 
 dotenv.config();
 
@@ -45,7 +45,7 @@ export async function getMessagesFromDB(
   groupId: string,
   offset: number,
   limit: number
-): Promise<redisMessageWithTimeStamp[]> {
+): Promise<messagesFromDB[]> {
   console.log(`Retrieving messages for group ${groupId} from MySQL.`);
   const db_api_url =
     `${process.env.DB_API_URL}api/chat/20Chats/${groupId}` +
@@ -70,12 +70,12 @@ export async function getMessagesFromDB(
     console.log("Response from MySQL API:", jsonResponse);
 
     if (jsonResponse && Array.isArray(jsonResponse.chats)) {
-      return jsonResponse.chats.map((chat: redisMessageWithTimeStamp) => ({
-        id: String(chat.id),          
+      return jsonResponse.chats.map((chat: messagesFromDB) => ({
+        id: String(chat.chatId),          
         groupId: String(chat.groupId),    // Convert `groupId` to string
         senderId: chat.senderId,
         senderName: chat.senderName,
-        content: chat.content,            // Map `message` to `content`
+        content: chat.message,            // Map `message` to `content`
         createdAt: chat.createdAt,
       }));
     } else {
