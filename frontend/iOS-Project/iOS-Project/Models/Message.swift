@@ -19,11 +19,16 @@ struct Message: Identifiable, Codable, Equatable {
     var formattedTimestamp: String {
         let isoDateFormatter = ISO8601DateFormatter()
         guard let date = isoDateFormatter.date(from: createdAt) else {
-            return createdAt
+            return createdAt // Fallback to original string if parsing fails
         }
 
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "hh:mm a, MMM d, yyyy"
+        dateFormatter.dateFormat = "hh:mm a, MMM d, yyyy" // 12-hour format with AM/PM
         return dateFormatter.string(from: date)
     }
+}
+
+struct WebSocketResponse: Decodable {
+    let type: String
+    let messages: [Message]?
 }

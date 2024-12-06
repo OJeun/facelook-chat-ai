@@ -1,20 +1,6 @@
 import Foundation
 import Combine
 
-// Add new struct for emoji response
-struct EmojiResponse: Codable {
-    let emoji: String
-    let userId: String
-    let messageId: String
-}
-
-struct WebSocketResponse: Codable {
-    let type: String
-    let messages: [Message]?
-    let emojis: [EmojiResponse]?
-    let emoji: String?
-}
-
 class ChatViewViewModel: ObservableObject {
     @Published var messages: [Message] = []
     @Published var newMessage: String = ""
@@ -22,7 +8,7 @@ class ChatViewViewModel: ObservableObject {
     private var webSocketTask: URLSessionWebSocketTask?
     private var cancellables = Set<AnyCancellable>()
     
-    let groupId: Int
+    let groupId: Int // Int for groupId when fetching groups
     let currentUserId: String
     let currentUserName: String
     let groupName: String
@@ -63,13 +49,12 @@ class ChatViewViewModel: ObservableObject {
             switch result {
             case .failure(let error):
                 print("WebSocket error: \(error.localizedDescription)")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    self.connectWebSocket()
-                }
             case .success(let message):
                 self.handleWebSocketMessage(message)
-                self.receiveMessage()
             }
+            
+            // Continue listening for the next message
+            self.receiveMessage()
         }
     }
     
@@ -85,40 +70,15 @@ class ChatViewViewModel: ObservableObject {
                 } else if response.type == "newMessage", let messages = response.messages, let newMessage = messages.first {
                     DispatchQueue.main.async {
                         if !self.messages.contains(where: { $0.id == newMessage.id }) {
+                            self.messages.append(newMessage)
                         }
-                    case "newMessage":
-                        if let messages = response.messages, let newMessage = messages.first {
-                            if !self.messages.contains(where: { $0.id == newMessage.id }) {
-                                self.messages.append(newMessage)
-                            }
-                        }
-                    case "newEmojis":
-                        if let emojis = response.emojis {
-                            self.updateMessagesWithEmojis(emojis)
-                        }
-                    default:
-                        print("Unknown message type: \(response.type)")
                     }
                 }
+            } else {
+                print("Failed to decode message: \(text)")
             }
         default:
-            print("Unsupported message type")
-        }
-    }
-    
-    private func updateMessagesWithEmojis(_ emojis: [EmojiResponse]) {
-        DispatchQueue.main.async {
-            var updatedMessages = self.messages
-            
-            for emoji in emojis {
-                if let index = updatedMessages.firstIndex(where: { $0.id == emoji.messageId }) {
-                    var message = updatedMessages[index]
-                    message.emoji = emoji.emoji
-                    updatedMessages[index] = message
-                }
-            }
-            
-            self.messages = updatedMessages
+            print("Unsupported WebSocket message type")
         }
     }
     
@@ -149,19 +109,21 @@ class ChatViewViewModel: ObservableObject {
         // }
     }
     
-    func addEmoji(_ emoji: String, toMessageId messageId: String) {
-        let emojiResponse = EmojiResponse(
-            emoji: emoji,
-            userId: currentUserId,
-            messageId: messageId
-        )
-        
-        if let data = try? JSONEncoder().encode(emojiResponse) {
-            webSocketTask?.send(.data(data)) { error in
-                if let error = error {
-                    print("Failed to send emoji: \(error)")
-                }
+    func addEmojisToMessages() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
+            guard let self = self else { return }
+
+            // Example emojis to assign
+            let emojis = ["😊", "😋", "😄", "🤔", "😍", "😢", "😡", "😎", "🥳"]
+            var updatedMessages = self.messages
+
+            // Assign emojis randomly to the messages
+            for i in 0..<updatedMessages.count {
+                let randomEmoji = emojis.randomElement() ?? "😃"
+                updatedMessages[i].emoji = randomEmoji
             }
+
+            self.messages = updatedMessages
         }
     }
 }

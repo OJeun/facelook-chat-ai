@@ -10,7 +10,6 @@ import SwiftUI
 struct ChatView: View {
     @ObservedObject var viewModel: ChatViewViewModel
     @State private var showSendInvitationView = false
-    @State private var newMessage: String = ""
 
     var body: some View {
         VStack {
@@ -50,9 +49,7 @@ struct ChatView: View {
             HStack {
                 TextField("Type a message...", text: $viewModel.newMessage)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                Button(action: {
-                    viewModel.sendMessage()
-                }) {
+                Button(action: viewModel.sendMessage) {
                     Text("Send")
                 }
                 .buttonStyle(.borderedProminent)
@@ -62,7 +59,7 @@ struct ChatView: View {
         .navigationTitle("Chat")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            viewModel.connectWebSocket()
+            viewModel.addEmojisToMessages() // Call the function on appear
         }
     }
 
@@ -71,14 +68,8 @@ struct ChatView: View {
             ScrollViewReader { proxy in
                 VStack(spacing: 12) {
                     ForEach(viewModel.messages) { message in
-                        MessageRow(
-                            message: message,
-                            isCurrentUser: message.senderId == viewModel.currentUserId,
-                            onEmojiTap: { emoji in
-                                viewModel.addEmoji(emoji, toMessageId: message.id)
-                            }
-                        )
-                        .id(message.id)
+                        MessageRow(message: message, isCurrentUser: message.senderId == viewModel.currentUserId)
+                            .id(message.id)
                     }
                 }
                 .onChange(of: viewModel.messages) { _, newMessages in
@@ -94,7 +85,6 @@ struct ChatView: View {
 struct MessageRow: View {
     let message: Message
     let isCurrentUser: Bool
-    let onEmojiTap: (String) -> Void
 
     var body: some View {
         HStack {
@@ -106,9 +96,6 @@ struct MessageRow: View {
                             .padding()
                             .background(Color.blue.opacity(0.2))
                             .cornerRadius(10)
-                            .onTapGesture {
-                                onEmojiTap("👍")
-                            }
 
                         if let emoji = message.emoji {
                             Text(emoji)
@@ -133,9 +120,6 @@ struct MessageRow: View {
                             .padding()
                             .background(Color.gray.opacity(0.2))
                             .cornerRadius(10)
-                            .onTapGesture {
-                                onEmojiTap("👍")
-                            }
 
                         if let emoji = message.emoji {
                             Text(emoji)
