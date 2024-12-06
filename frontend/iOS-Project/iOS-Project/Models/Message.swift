@@ -27,8 +27,3 @@ struct Message: Identifiable, Codable, Equatable {
         return dateFormatter.string(from: date)
     }
 }
-
-struct WebSocketResponse: Decodable {
-    let type: String
-    let messages: [Message]?
-}
