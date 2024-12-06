@@ -18,7 +18,7 @@ struct ContentView: View {
                         Label("Home", systemImage: "house")
                     }
 
-                ProfileView()
+                ProfileView(isLoggedIn: $viewModel.isLoggedIn)
                     .tabItem {
                         Label("Profile", systemImage: "person.circle")
                     }

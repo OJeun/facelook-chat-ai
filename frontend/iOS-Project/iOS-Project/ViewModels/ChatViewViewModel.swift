@@ -11,11 +11,13 @@ class ChatViewViewModel: ObservableObject {
     let groupId: Int // Int for groupId when fetching groups
     let currentUserId: String
     let currentUserName: String
+    let groupName: String
 
-    init(groupId: Int, currentUserId: String, currentUserName: String) {
+    init(groupId: Int, currentUserId: String, currentUserName: String, groupName: String) {
         self.groupId = groupId
         self.currentUserId = currentUserId
         self.currentUserName = currentUserName
+        self.groupName = groupName
         connectWebSocket()
     }
 

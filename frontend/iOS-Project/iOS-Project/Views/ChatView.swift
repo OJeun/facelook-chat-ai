@@ -12,6 +12,28 @@ struct ChatView: View {
 
     var body: some View {
         VStack {
+            // Header with Chat Title and Add Button
+            HStack {
+                Text(viewModel.groupName)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                Spacer()
+                Button(action: {
+                    // TODO: Add logic to send a chat invitation to users
+                    print("Add person to chat room")
+                }) {
+                    Image(systemName: "plus")
+                        .font(.title2)
+                        .padding()
+                        .background(Color.blue.opacity(0.1))
+                        .clipShape(Circle())
+                }
+            }
+            .padding(.horizontal)
+            .padding(.top, 10)
+
+            Divider()
+
             // Message List
             messageList
 
@@ -90,6 +112,7 @@ struct MessageRow: View {
     ChatView(viewModel: ChatViewViewModel(
         groupId: 1, // Int for fetching the group
         currentUserId: "22",
-        currentUserName: "Aric Or"
+        currentUserName: "Aric Or",
+        groupName: "SAMPLE CHAT"
     ))
 }
