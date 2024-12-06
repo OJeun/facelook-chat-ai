@@ -11,7 +11,7 @@ struct EmojiResponse: Codable {
 struct WebSocketResponse: Codable {
     let type: String
     let messages: [Message]?
-    let emojis: [EmojiResponse]?  // Add this line
+    let emojis: [EmojiResponse]?
 }
 
 class ChatViewViewModel: ObservableObject {
@@ -21,7 +21,7 @@ class ChatViewViewModel: ObservableObject {
     private var webSocketTask: URLSessionWebSocketTask?
     private var cancellables = Set<AnyCancellable>()
     
-    let groupId: Int // Int for groupId when fetching groups
+    let groupId: Int
     let currentUserId: String
     let currentUserName: String
     let groupName: String
@@ -76,7 +76,9 @@ class ChatViewViewModel: ObservableObject {
         case .string(let text):
             if let data = text.data(using: .utf8),
                let response = try? JSONDecoder().decode(WebSocketResponse.self, from: data) {
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+                    
                     switch response.type {
                     case "recentMessages":
                         if let messages = response.messages {
@@ -96,17 +98,13 @@ class ChatViewViewModel: ObservableObject {
                         print("Unknown message type: \(response.type)")
                     }
                 }
-            } else {
-                print("Failed to decode message: \(text)")
             }
         default:
-            print("Unsupported WebSocket message type")
+            print("Unsupported message type")
         }
     }
     
     private func updateMessagesWithEmojis(_ emojis: [EmojiResponse]) {
-        guard !emojis.isEmpty else { return }
-        
         var updatedMessages = self.messages
         
         for emoji in emojis {
