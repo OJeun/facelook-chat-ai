@@ -80,7 +80,7 @@ export function setupWebsocket(server: FastifyInstance) {
       // Broadcast message to all connected clients in the same group
       for (const client of connectedClients[groupId]) {
         if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({ type: "newMessage", message }));
+          client.send(JSON.stringify({ type: "newMessage", messages: [message] }));
         }
       }
     });
