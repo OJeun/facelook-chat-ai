@@ -173,7 +173,7 @@ export async function friendRoutes(fastify: FastifyInstance) {
   );
 
   fastify.get(
-    "user/achievementPoint",
+    "/user/achievementPoint",
     {
       schema: {
         tags: ["friend"],
