@@ -25,8 +25,11 @@ struct LeaderboardView: View {
                         HStack {
                             // Rank Icon
                             viewModel.rankIcon(for: index + 1)
-                                .font(.system(size: 30))
-                                .foregroundColor(index < 3 ? .blue : .gray)
+                                .font(.system(size: 25))
+                                .foregroundColor(
+                                    index == 0 ? .red :
+                                    (index < 3 ? .blue : .gray)
+                                )
                                 .frame(width: 30, alignment: .center)
                             
                             // User Info
