@@ -1,5 +1,8 @@
 # ios_project
 
+##### install dependencies
+yarn install
+
 ##### Run the server
 yarn dev
 
