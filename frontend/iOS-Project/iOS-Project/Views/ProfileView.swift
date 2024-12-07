@@ -49,16 +49,12 @@ struct ProfileView: View {
 
                 // Buttons
                 HStack(spacing: 15) {
-                    NavigationLink(destination: EditProfileView()) {
-                        ButtonView(title: "Edit Profile")
+                    NavigationLink(destination: AddFriendView()) {
+                        ButtonView(title: "Add Friend")
                     }
 
                     NavigationLink(destination: FriendRequestsView()) {
                         ButtonView(title: "Friend Request")
-                    }
-
-                    NavigationLink(destination: AddFriendView()) {
-                        ButtonView(title: "Add Friend")
                     }
                 }
                 .padding(.horizontal)
