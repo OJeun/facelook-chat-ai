@@ -45,10 +45,6 @@ export function setupWebsocket(server: FastifyInstance) {
 
     if (!connectedClients[groupId]) {
       connectedClients[groupId] = new Set();
-
-      // dumpTimers[groupId] = setInterval(() => {
-      //   dumpMessagesToDB(groupId);
-      // }, 10 * 60 * 1000);
     }
 
     setInterval(() => {
@@ -77,7 +73,6 @@ export function setupWebsocket(server: FastifyInstance) {
 
       await saveMessage(message);
 
-      // Broadcast message to all connected clients in the same group
       for (const client of connectedClients[groupId]) {
         if (client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify({ type: "newMessage", messages: [message] }));
@@ -86,45 +81,30 @@ export function setupWebsocket(server: FastifyInstance) {
     });
 
     socket.on("close", async () => {
-      console.log(
-        `Socket is closing for group ${groupId}:`,
-        connectedClients[groupId].size
-      );
+
       connectedClients[groupId].delete(socket);
-      console.log(
-        `Remaining clients for group ${groupId}:`,
-        connectedClients[groupId].size
-      );
 
       if (connectedClients[groupId].size === 0) {
         console.log(`All users have left group ${groupId}. Cleaning up...`);
 
         try {
-          console.log(
-            `1.Dumping messages for group ${groupId} to the database...`
-          );
           await dumpMessagesToDB(groupId);
           console.log(`. Messages for group ${groupId} successfully saved.`);
         } catch (error) {
           console.error(
-            `2. Failed to dump messages for group ${groupId} to the database:`,
             error
           );
         }
 
         try {
-          console.log(`Clearing messages for group ${groupId} from Redis...`);
           await clearMessages(groupId); // Remove messages from Redis
-          console.log(`Messages for group ${groupId} successfully cleared.`);
         } catch (error) {
           console.error(
-            `Failed to clear messages for group ${groupId} from Redis:`,
             error
           );
         }
       } else {
         console.log(
-          `User disconnected from group ${groupId}. Remaining users: ${connectedClients[groupId].size}`
         );
       }
     });

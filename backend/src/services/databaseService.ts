@@ -23,7 +23,6 @@ export async function saveMessagesToDB(
     createdAt: msg.createdAt,
   }));
 
-  console.log("5. This is the messages that are being saved: ", mappedMessages);
 
   const response = await fetch(db_api_url, {
     method: "POST",
@@ -67,7 +66,6 @@ export async function getMessagesFromDB(
     }
 
     const jsonResponse = await response.json();
-    console.log("Response from MySQL API:", jsonResponse);
 
     if (jsonResponse && Array.isArray(jsonResponse.chats)) {
       return jsonResponse.chats.map((chat: messagesFromDB) => ({
