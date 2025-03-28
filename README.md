@@ -40,19 +40,8 @@ Using Docker gives us:
 
 ## 🧱 Architecture Overview
 
-```mermaid
-graph TD
-  Client["Client (Browser)"]
-  Server["Fastify Server (WebSocket + API)"]
-  Redis["Redis (In-memory Cache)"]
-  DB["Database (Persistent Storage)"]
-  OpenAI["OpenAI API"]
+<img width="746" alt="image" src="https://github.com/user-attachments/assets/e19adacd-f091-47b3-8563-a07b42424732" />
 
-  Client -->|WebSocket| Server
-  Server -->|Save Message| Redis
-  Server -->|Get Response| OpenAI
-  Redis -->|Dump When Group Ends| DB
-```
 ## How to start this locally?
 
 🐳 Running with Docker Compose
@@ -83,6 +72,8 @@ DB_API_URL=mysql://mysql:27017/your-database
 OPENAI_API_KEY=your_openai_key
 Note: Use redis and mongo as hostnames inside the .env because they are Docker Compose service names.
 ```
+
+
 
 3. Run the app
 
