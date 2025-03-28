@@ -53,3 +53,43 @@ graph TD
   Server -->|Get Response| OpenAI
   Redis -->|Dump When Group Ends| DB
 ```
+## How to start this locally?
+
+🐳 Running with Docker Compose
+This project supports running the backend and Redis together using Docker Compose.
+
+📦 Prerequisites <br>
+1. Docker & Docker Compose installed
+
+🚀 Steps to Run <br>
+2. Clone the repository
+
+```
+git clone https://github.com/your-username/your-repo.git
+cd your-repo
+```
+
+```
+cp .env.example .env
+```
+Fill in your environment variables in the .env file:
+
+
+```env
+NODE_ENV=development
+JWT_SECRET=your_jwt_secret
+REDIS_URL=redis://redis:6379
+DB_API_URL=mysql://mysql:27017/your-database
+OPENAI_API_KEY=your_openai_key
+Note: Use redis and mongo as hostnames inside the .env because they are Docker Compose service names.
+```
+
+3. Run the app
+
+```
+docker-compose up --build
+```
+This will:
+Build and run the backend container (from Dockerfile)
+
+Spin up a Redis container
